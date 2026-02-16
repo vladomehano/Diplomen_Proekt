@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Antikvarnik.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
 
         public DbSet<Item> Items { get; set; }
