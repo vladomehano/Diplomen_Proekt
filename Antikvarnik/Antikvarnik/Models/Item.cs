@@ -15,8 +15,8 @@ namespace Antikvarnik.Models
 
     }
 
-    public class AppUser : IdentityUser
+  /*  public class AppUser : IdentityUser
     {
 
-    }
+    }*/
 }
