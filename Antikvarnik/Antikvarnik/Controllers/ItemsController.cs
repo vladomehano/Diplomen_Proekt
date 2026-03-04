@@ -1,16 +1,26 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Antikvarnik.Data;
+using Antikvarnik.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Antikvarnik.Controllers
 {
     public class ItemsController : Controller
     {
+        private readonly ApplicationDbContext dbc;
+
+        public ItemsController(ApplicationDbContext dbContext)
+        {
+            this.dbc = dbContext;
+        }
         public IActionResult Index()
         {
-            return View();
+            Item[] Items = dbc.Items.ToArray();
+            return View(Items);
         }
-        public IActionResult Details()
+        public IActionResult Details(int itemId)
         {
-            return View();
+            Item itemFd = dbc.Items.FirstOrDefault(x => x.Id == itemId);
+            return View(itemFd);
         }
     }
 }
