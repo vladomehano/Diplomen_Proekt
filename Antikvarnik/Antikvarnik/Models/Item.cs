@@ -1,4 +1,6 @@
-﻿namespace Antikvarnik.Models
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace Antikvarnik.Models
 {
     public class Item
     {
@@ -10,6 +12,11 @@
         public string PicturesUrls { get; set; }
 
         public string[] Pictures => PicturesUrls.Split("|",StringSplitOptions.RemoveEmptyEntries);
+
+    }
+
+    public class AppUser : IdentityUser
+    {
 
     }
 }
