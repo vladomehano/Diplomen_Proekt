@@ -11,6 +11,8 @@ namespace Antikvarnik.Models
         public string MainPicUrl {  get; set; }
         public string PicturesUrls { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         public string[] Pictures => PicturesUrls.Split("|",StringSplitOptions.RemoveEmptyEntries);
 
     }

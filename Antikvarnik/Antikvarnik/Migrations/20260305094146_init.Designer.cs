@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Antikvarnik.Data.Migrations
+namespace Antikvarnik.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260216151034_User_Extension")]
-    partial class User_Extension
+    [Migration("20260305094146_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -104,6 +104,9 @@ namespace Antikvarnik.Data.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("MainPicUrl")
                         .IsRequired()
