@@ -1,0 +1,36 @@
+@model Item[]
+
+@{
+    ViewData["Title"] = "Deleted Items";
+}
+
+<h1 class="text-center text-danger">Изтрити артикули</h1>
+
+@if (Model == null || Model.Length == 0)
+{
+    <p class="text-center">Няма изтрити артикули.</p>
+}
+else
+{
+    <ul class="d-flex justify-content-between mt-3 flex-wrap">
+        @foreach (var item in Model)
+        {
+            <li class="card mb-3 p-2" style="width: 18rem;">
+                <h4 class="text-center mt-4">@item.Name</h4>
+                <img src="@item.MainPicUrl" class="card-img-top" alt="item-main-pic">
+                <div class="card-body">
+                    <p class="card-text text-danger">@item.Description</p>
+                    <div class="d-flex justify-content-center">
+                        <a asp-area="" asp-controller="Items" asp-action="Details" asp-route-itemId="@item.Id" class="btn btn-warning">Детайли</a>
+                    </div>
+
+                    <form asp-area="" asp-controller="Items" asp-action="Restore" method="post" class="d-flex justify-content-center mt-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="itemId" value="@item.Id" />
+                        <button type="submit" class="btn btn-success">Възстанови</button>
+                    </form>
+                </div>
+            </li>
+        }
+    </ul>
+}

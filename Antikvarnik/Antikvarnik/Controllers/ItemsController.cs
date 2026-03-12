@@ -45,6 +45,30 @@ namespace Antikvarnik.Controllers
             return RedirectToAction("Index");
         }
 
+        // GET: Items/Deleted
+        [HttpGet]
+        public IActionResult Deleted()
+        {
+            Item[] deletedItems = dbc.Items.Where(i => i.IsDeleted == true).ToArray();
+            return View(deletedItems);
+        }
+
+        // POST: Items/Restore
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Restore(int itemId)
+        {
+            Item? itemFd = dbc.Items.FirstOrDefault(x => x.Id == itemId);
+            if (itemFd != null)
+            {
+                itemFd.IsDeleted = false;
+                dbc.SaveChanges();
+            }
+
+            // After restoring, go back to the main index (all items)
+            return RedirectToAction("Index");
+        }
+
         // GET: Items/Add
         [HttpGet]
         public IActionResult Add()
@@ -79,10 +103,6 @@ namespace Antikvarnik.Controllers
                 ModelState.AddModelError(string.Empty, "Provide a main picture by uploading a file or entering a URL.");
             }
 
-            if (!ModelState.IsValid)
-            {
-                return View(item);
-            }
 
             // Ensure upload directory exists
             var uploadsRoot = Path.Combine(env.WebRootPath ?? "wwwroot", "uploads", "items");
@@ -120,7 +140,18 @@ namespace Antikvarnik.Controllers
             }
 
             item.IsDeleted = false;
+            ModelState.Clear();
+            TryValidateModel(item);
+          
+            if (!ModelState.IsValid)
+            {
+                return View(item);
+            }
+
             dbc.Items.Add(item);
+           
+
+
             await dbc.SaveChangesAsync();
 
             return RedirectToAction("Index");

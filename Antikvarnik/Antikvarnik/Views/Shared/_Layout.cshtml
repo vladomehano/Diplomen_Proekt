@@ -33,6 +33,12 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Items" asp-action="Add">Добави артикул</a>
                         </li>
+                        @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                        {
+                            <div class="mb-3 text-end">
+                                <a asp-area="" asp-controller="Items" asp-action="Deleted" class="btn btn-secondary">Преглед на изтрити артикули</a>
+                            </div>
+                        }
                         @* @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
                         {
                             <li>Ти си админ!!!</li>

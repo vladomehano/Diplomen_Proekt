@@ -1,16 +1,17 @@
-﻿@model Antikvarnik.Models.Item
+@model Antikvarnik.Models.Item
 
 @{
-    ViewData["Title"] = "Add Item";
+    ViewData["Title"] = "Edit Item";
 }
 
-<h1 class="text-center">Добави артикул</h1>
+<h1 class="text-center">Редактирай артикул</h1>
 
-<form asp-action="Add" method="post" enctype="multipart/form-data" class="mx-auto half-width">
+<form asp-action="Edit" method="post" enctype="multipart/form-data" class="mx-auto half-width">
     @Html.AntiForgeryToken()
+    <input type="hidden" name="itemId" value="@Model.Id" />
 
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            
+
     <div class="form-group">
         <label asp-for="Name">Име</label>
         <input asp-for="Name" class="form-control" placeholder="Name..." />
@@ -32,33 +33,33 @@
     <hr class="hr-2 bg-dark half-width mt-4" />
 
     <div class="form-group">
-        <label for="MainPicFile">Главна снимка (upload from your PC)</label>
+        <label for="MainPicFile">Новa главна снимка (upload from your PC) - оставете празно ако не искате да сменяте</label>
         <input type="file" class="form-control" id="MainPicFile" name="MainPicFile" accept="image/*" />
         <small class="form-text text-muted">Or provide a direct image URL below.</small>
     </div>
 
-  @*   <div class="form-group">
+    <div class="form-group">
         <label asp-for="MainPicUrl">Главна снимка URL (незадължително)</label>
         <input asp-for="MainPicUrl" class="form-control" placeholder="https://..." />
         <span asp-validation-for="MainPicUrl" class="text-danger"></span>
-    </div> *@
+    </div>
 
     <div class="form-group">
-        <label for="PicturesFiles">Галерия от снимки (Изберете снимките от вашия компютър)</label>
+        <label for="PicturesFiles">Добави още снимки (Изберете снимките от вашия компютър)</label>
         <input type="file" class="form-control" id="PicturesFiles" name="PicturesFiles" accept="image/*" multiple />
         <small class="form-text text-muted">You can also paste additional image URLs below, separated by '|' (pipe).</small>
     </div>
 
-   @*  <div class="form-group">
+    <div class="form-group">
         <label asp-for="PicturesUrls">Допълнителни снимки URLs (Разделени с |)</label>
         <input asp-for="PicturesUrls" class="form-control" placeholder="https://... | https://..." />
         <span asp-validation-for="PicturesUrls" class="text-danger"></span>
-    </div> *@
+    </div>
 
     <hr class="hr-2 bg-dark half-width mt-4" />
 
     <div class="button-holder mt-2 d-flex justify-content-center">
-        <button type="submit" class="btn chushka-bg-color">Create</button>
+        <button type="submit" class="btn chushka-bg-color">Save</button>
     </div>
 </form>
 
