@@ -1,39 +1,79 @@
-﻿@model Item[]
+﻿@using Antikvarnik.Models.Enums
+@model Item[]
 
-<h1 class="mb-4 text-center text-success">Изберете някой от нашите уникални антикварни предмети</h1>
-@*<img src="https://www.findupet.com/uploads/petgalleryfile/images/420x315/anglijski-koker-shpaniol.jpg" alt="Dog" />*@
+@{
+    ViewData["Title"] = "Каталог";
+}
 
 
 
-<ul class="d-flex justify-content-between mt-3 flex-wrap">
-    @for (int i = 0; i < 10; i++)
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h1 class="mb-1 text-success">Налични и публикувани антикварни предмети</h1>
+        <p class="text-muted mb-0">Разгледай одобрени оферти, резервирани предмети и вече продадени артикули.</p>
+    </div>
+    @if (User.Identity?.IsAuthenticated == true)
     {
+        <a asp-controller="Items" asp-action="Add" class="btn btn-outline-dark">Добави оферта</a>
+    }
+</div>
+
+@if (Model.Length == 0)
+{
+    <div class="alert alert-info">Все още няма публикувани артикули.</div>
+}
+else
+{
+    <div class="row g-4">
         @foreach (Item item in Model)
         {
+            var badgeClass = item.Status switch
+            {
+                ItemStatus.Available => "bg-success",
+                ItemStatus.Reserved => "bg-warning text-dark",
+                ItemStatus.Sold => "bg-secondary",
+                ItemStatus.Waiting => "bg-info text-dark",
+                _ => "bg-danger"
+            };
 
-            <li class="card mb-3 p-2" style="width: 18rem;">
-                <h4 class="text-center mt-4 ">@item.Name</h4>
-                <img src="@item.MainPicUrl" class="card-img-top " alt="item-main-pic">
-                <div class="card-body">
-                    <p class="card-text text-danger">@item.Description</p>
-                    <div class="d-flex justify-content-center">
-                        <a asp-area="" asp-controller="Items" asp-action="Details" asp-route-itemId="@item.Id" type="button" class="btn btn-warning m-2"><i class="fas fa-info-circle"></i> Детайли</a>
-                    </div>
-                    @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
-                    {
-                        <div class="d-flex justify-content-center">
-                            <a asp-area="" asp-controller="Items" asp-action="Delete" asp-route-itemId="@item.Id" type="button" class="btn btn-danger m-4"><i class="fas fa-trash-alt "></i> Изтрий</a>
+            <div class="col-md-6 col-xl-4">
+                <article class="card h-100 shadow-sm border-0">
+                    <img src="@item.MainPicUrl" class="card-img-top" alt="@item.Name" style="height: 260px; object-fit: cover;">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h3 class="h5 mb-0">@item.Name</h3>
+                            <span class="badge @badgeClass">@item.Status</span>
                         </div>
-                    }
-                    
-                </div>
+               
 
-            </li>
+
+                        <p class="text-muted small mb-2">Категория: @(item.Category?.Name ?? "Без категория")</p>
+                        <p class="mb-2"><strong>Цена:</strong> @item.Price.ToString("F2") лв.</p>
+                        <p class="mb-2"><strong>Състояние:</strong> @item.Condition</p>
+                        @if (!string.IsNullOrWhiteSpace(item.YearOrPeriod))
+                        {
+                            <p class="mb-2"><strong>Период:</strong> @item.YearOrPeriod</p>
+                        }
+
+                        <p class="card-text text-muted flex-grow-1">@item.Description</p>
+
+    
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            <a asp-controller="Items" asp-action="Details" asp-route-itemId="@item.Id" class="btn btn-warning">Детайли</a>
+
+
+                            @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+                            {
+                                <form asp-controller="Items" asp-action="Delete" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="itemId" value="@item.Id" />
+                                    <button type="submit" class="btn btn-outline-danger">Скрий</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </article>
+            </div>
         }
-
-
-
-
-    }
-
-</ul>
+    </div>
+}

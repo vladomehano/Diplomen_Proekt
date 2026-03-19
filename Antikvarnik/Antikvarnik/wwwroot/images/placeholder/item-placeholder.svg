@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" role="img" aria-label="No image available">
+  <rect width="640" height="480" fill="#f2ede4" />
+  <rect x="60" y="60" width="520" height="360" rx="24" fill="#d4c4aa" />
+  <circle cx="220" cy="190" r="42" fill="#8b6f47" />
+  <path d="M140 340l98-92 78 64 62-52 122 80H140z" fill="#8b6f47" />
+  <text x="320" y="420" text-anchor="middle" font-family="Times New Roman, serif" font-size="28" fill="#5e4b2f">Antikvarnik</text>
+</svg>
