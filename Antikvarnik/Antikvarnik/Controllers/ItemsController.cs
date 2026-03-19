@@ -29,14 +29,23 @@ namespace Antikvarnik.Controllers
             this.userManager = userManager;
         }
 
- 
+
         public async Task<IActionResult> Index()
         {
+            var currentUser = await userManager.GetUserAsync(User);
+            var isAdmin = User.IsInRole("Admin");
+            var currentUserId = currentUser?.Id;
+
             Item[] items = await dbc.Items
                 .AsNoTracking()
                 .Include(i => i.Category)
                 .Include(i => i.Images)
-                .Where(i => !i.IsDeleted)
+                .Where(i => !i.IsDeleted &&
+                    (i.Status == ItemStatus.Available ||
+                     i.Status == ItemStatus.Reserved ||
+                     i.Status == ItemStatus.Sold ||
+                     (currentUserId != null && i.SellerId == currentUserId) ||
+                     isAdmin))
                 .OrderByDescending(i => i.CreatedOn)
                 .ToArrayAsync();
 
@@ -59,8 +68,76 @@ namespace Antikvarnik.Controllers
             return View(item);
         }
 
-   
         [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> Waiting()
+        {
+            Item[] waitingItems = await dbc.Items
+                .AsNoTracking()
+                .Include(i => i.Category)
+                .Include(i => i.Images)
+                .Include(i => i.Seller)
+                .Where(i => !i.IsDeleted && i.Status == ItemStatus.Waiting)
+                .OrderBy(i => i.CreatedOn)
+                .ToArrayAsync();
+
+            return View(waitingItems);
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Approve(int itemId)
+        {
+            Item? item = await dbc.Items.FirstOrDefaultAsync(x => x.Id == itemId && !x.IsDeleted);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            if (item.Status != ItemStatus.Waiting)
+            {
+                return BadRequest();
+            }
+
+            var currentUser = await userManager.GetUserAsync(User);
+            item.Status = ItemStatus.Available;
+            item.ApprovedByAdminId = currentUser?.Id;
+            item.UpdatedOn = DateTime.UtcNow;
+
+            await dbc.SaveChangesAsync();
+            TempData["StatusMessage"] = $"Артикулът \"{item.Name}\" беше одобрен и е вече видим в каталога.";
+
+            return RedirectToAction(nameof(Waiting));
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Reject(int itemId)
+        {
+            Item? item = await dbc.Items.FirstOrDefaultAsync(x => x.Id == itemId && !x.IsDeleted);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            if (item.Status != ItemStatus.Waiting)
+            {
+                return BadRequest();
+            }
+
+            item.Status = ItemStatus.Rejected;
+            item.ApprovedByAdminId = null;
+            item.UpdatedOn = DateTime.UtcNow;
+
+            await dbc.SaveChangesAsync();
+            TempData["StatusMessage"] = $"Артикулът \"{item.Name}\" беше отхвърлен.";
+
+            return RedirectToAction(nameof(Waiting));
+        }
+
+
+            [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int itemId)
