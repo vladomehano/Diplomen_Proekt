@@ -20,10 +20,10 @@ namespace Antikvarnik.Controllers
         private readonly IWebHostEnvironment env;
         private readonly UserManager<AppUser> userManager;
 
-      
+
         public ItemsController(ApplicationDbContext dbContext, IWebHostEnvironment env, UserManager<AppUser> userManager)
         {
-            
+
             dbc = dbContext;
             this.env = env;
             this.userManager = userManager;
@@ -44,8 +44,8 @@ namespace Antikvarnik.Controllers
                     (i.Status == ItemStatus.Available ||
                      i.Status == ItemStatus.Reserved ||
                      i.Status == ItemStatus.Sold ||
-                     (currentUserId != null && i.SellerId == currentUserId) ||
-                     isAdmin))
+                     ((currentUserId != null && i.SellerId == currentUserId) && i.Status == ItemStatus.Waiting) ||
+                     (isAdmin && i.Status == ItemStatus.Waiting)))
                 .OrderByDescending(i => i.CreatedOn)
                 .ToArrayAsync();
 
@@ -63,6 +63,10 @@ namespace Antikvarnik.Controllers
             if (item == null)
             {
                 return NotFound();
+            }
+            if (!await CanViewItemAsync(item))
+            {
+                return Forbid();
             }
 
             return View(item);
@@ -136,13 +140,126 @@ namespace Antikvarnik.Controllers
             return RedirectToAction(nameof(Waiting));
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> Edit(int itemId)
+        {
+            Item? item = await dbc.Items
+                .AsNoTracking()
+                .Include(i => i.Images.OrderBy(ii => ii.SortOrder))
+                .FirstOrDefaultAsync(x => x.Id == itemId && !x.IsDeleted);
 
-            [Authorize(Roles = "Admin")]
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+
+            var viewModel = new ItemFormViewModel
+            {
+                Id = item.Id,
+                Name = item.Name,
+                Description = item.Description,
+                Price = item.Price,
+                Condition = item.Condition,
+                YearOrPeriod = item.YearOrPeriod,
+                CategoryId = item.CategoryId,
+                ExistingMainPicUrl = item.MainPicUrl,
+                ExistingPictures = item.Pictures,
+                Categories = await GetCategoryOptionsAsync()
+            };
+
+            return View(viewModel);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int itemId, ItemFormViewModel model)
+        {
+            Item? item = await dbc.Items
+                .Include(i => i.Images)
+                .FirstOrDefaultAsync(x => x.Id == itemId && !x.IsDeleted);
+
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+
+            if (!await dbc.Categories.AnyAsync(c => c.Id == model.CategoryId))
+            {
+                ModelState.AddModelError(nameof(model.CategoryId), "Избраната категория не съществува.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.Id = item.Id;
+                model.ExistingMainPicUrl = item.MainPicUrl;
+                model.ExistingPictures = item.Pictures;
+                model.Categories = await GetCategoryOptionsAsync();
+                return View(model);
+            }
+
+            item.Name = model.Name.Trim();
+            item.Description = model.Description.Trim();
+            item.Price = model.Price;
+            item.Condition = model.Condition.Trim();
+            item.YearOrPeriod = string.IsNullOrWhiteSpace(model.YearOrPeriod) ? null : model.YearOrPeriod.Trim();
+            item.CategoryId = model.CategoryId;
+            item.UpdatedOn = DateTime.UtcNow;
+
+            var uploadsRoot = Path.Combine(env.WebRootPath ?? "wwwroot", "uploads", "items");
+            Directory.CreateDirectory(uploadsRoot);
+
+            if (model.MainPicFile != null && model.MainPicFile.Length > 0)
+            {
+                var newMainImageUrl = await SaveUploadedImageAsync(model.MainPicFile, uploadsRoot);
+                var currentMainImage = item.Images
+                    .OrderByDescending(i => i.IsMain)
+                    .ThenBy(i => i.SortOrder)
+                    .FirstOrDefault();
+
+                if (currentMainImage == null)
+                {
+                    item.Images.Add(new ItemImage
+                    {
+                        ImageUrl = newMainImageUrl,
+                        IsMain = true,
+                        SortOrder = 0
+                    });
+                }
+                else
+                {
+                    currentMainImage.ImageUrl = newMainImageUrl;
+                    currentMainImage.IsMain = true;
+                }
+            }
+
+            var nextSortOrder = item.Images.Any() ? item.Images.Max(i => i.SortOrder) + 1 : 1;
+            foreach (var file in model.PicturesFiles.Where(f => f != null && f.Length > 0))
+            {
+                var imageUrl = await SaveUploadedImageAsync(file, uploadsRoot);
+                item.Images.Add(new ItemImage
+                {
+                    ImageUrl = imageUrl,
+                    IsMain = false,
+                    SortOrder = nextSortOrder++
+                });
+            }
+
+            TempData["StatusMessage"] = $"Артикулът \"{item.Name}\" беше редактиран успешно.";
+
+            await dbc.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int itemId)
         {
-                Item? item = await dbc.Items.FirstOrDefaultAsync(x => x.Id == itemId);
+            Item? item = await dbc.Items.FirstOrDefaultAsync(x => x.Id == itemId);
             if (item != null)
             {
                 item.IsDeleted = true;
@@ -167,7 +284,7 @@ namespace Antikvarnik.Controllers
                 .ToArrayAsync();
 
             return View(deletedItems);
-        }
+        }       
 
         // POST: Items/Restore
         [Authorize(Roles = "Admin")]
@@ -175,7 +292,7 @@ namespace Antikvarnik.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restore(int itemId)
         {
-                Item? item = await dbc.Items.FirstOrDefaultAsync(x => x.Id == itemId);
+            Item? item = await dbc.Items.FirstOrDefaultAsync(x => x.Id == itemId);
             if (item != null)
             {
                 item.IsDeleted = false;
@@ -227,7 +344,8 @@ namespace Antikvarnik.Controllers
 
             // If user uploaded a main picture file, save it and override MainPicUrl
             var currentUser = await userManager.GetUserAsync(User);
-            var item = new Item { 
+            var item = new Item
+            {
                 Name = model.Name.Trim(),
                 Description = model.Description.Trim(),
                 Price = model.Price,
@@ -240,57 +358,84 @@ namespace Antikvarnik.Controllers
                 UpdatedOn = DateTime.UtcNow,
             };
 
-    var imageOrder = 0;
-    var mainImageUrl = await SaveUploadedImageAsync(model.MainPicFile!, uploadsRoot);
-    item.Images.Add(new ItemImage
+            var imageOrder = 0;
+            var mainImageUrl = await SaveUploadedImageAsync(model.MainPicFile!, uploadsRoot);
+            item.Images.Add(new ItemImage
             {
-                
-            
+
+
                 ImageUrl = mainImageUrl,
                 IsMain = true,
                 SortOrder = imageOrder++
             });
 
-    foreach (var file in model.PicturesFiles.Where(f => f != null && f.Length > 0))
-    {
-        var imageUrl = await SaveUploadedImageAsync(file, uploadsRoot);
-        item.Images.Add(new ItemImage
-        {
-            ImageUrl = imageUrl,
-            IsMain = false,
-            SortOrder = imageOrder++
-        });
-    }
+            foreach (var file in model.PicturesFiles.Where(f => f != null && f.Length > 0))
+            {
+                var imageUrl = await SaveUploadedImageAsync(file, uploadsRoot);
+                item.Images.Add(new ItemImage
+                {
+                    ImageUrl = imageUrl,
+                    IsMain = false,
+                    SortOrder = imageOrder++
+                });
+            }
 
-dbc.Items.Add(item);
+            dbc.Items.Add(item);
 
-await dbc.SaveChangesAsync();
+            await dbc.SaveChangesAsync();
 
-return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index));
         }
 
-private async Task<string> SaveUploadedImageAsync(IFormFile file, string uploadsRoot)
-{
-    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-    var filePath = Path.Combine(uploadsRoot, fileName);
-
-    await using var stream = new FileStream(filePath, FileMode.Create);
-    await file.CopyToAsync(stream);
-
-    return "/uploads/items/" + fileName;
-}
-
-private async Task<IEnumerable<SelectListItem>> GetCategoryOptionsAsync()
-{
-    return await dbc.Categories
-        .AsNoTracking()
-        .OrderBy(c => c.Name)
-        .Select(c => new SelectListItem
+        private async Task<string> SaveUploadedImageAsync(IFormFile file, string uploadsRoot)
         {
-            Value = c.Id.ToString(),
-            Text = c.Name
-        })
-        .ToListAsync();
-}
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            var filePath = Path.Combine(uploadsRoot, fileName);
+
+            await using var stream = new FileStream(filePath, FileMode.Create);
+            await file.CopyToAsync(stream);
+
+            return "/uploads/items/" + fileName;
+        }
+
+        private async Task<IEnumerable<SelectListItem>> GetCategoryOptionsAsync()
+        {
+            return await dbc.Categories
+                .AsNoTracking()
+                .OrderBy(c => c.Name)
+                .Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Name
+                })
+                .ToListAsync();
+        }
+
+        private async Task<bool> CanViewItemAsync(Item item)
+        {
+            if (item.Status == ItemStatus.Available || item.Status == ItemStatus.Reserved || item.Status == ItemStatus.Sold)
+            {
+                return true;
+            }
+
+            if (User.IsInRole("Admin"))
+            {
+                return true;
+            }
+
+            var currentUser = await userManager.GetUserAsync(User);
+            return currentUser?.Id != null && item.SellerId == currentUser.Id;
+        }
+
+        private async Task<bool> CanEditItemAsync(Item item)
+        {
+            if (User.IsInRole("Admin"))
+            {
+                return true;
+            }
+
+            var currentUser = await userManager.GetUserAsync(User);
+            return currentUser?.Id != null && item.SellerId == currentUser.Id;
+        }
     }
 }

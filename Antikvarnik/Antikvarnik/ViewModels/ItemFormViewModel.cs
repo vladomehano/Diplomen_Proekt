@@ -6,6 +6,8 @@ namespace Antikvarnik.ViewModels
 {
     public class ItemFormViewModel
     {
+        public int Id { get; set; }
+
         [Required]
         [StringLength(120)]
         public string Name { get; set; } = string.Empty;
@@ -33,6 +35,10 @@ namespace Antikvarnik.ViewModels
 
         [Display(Name = "Допълнителни снимки")]
         public List<IFormFile> PicturesFiles { get; set; } = new();
+
+        public string? ExistingMainPicUrl { get; set; }
+
+        public string[] ExistingPictures { get; set; } = Array.Empty<string>();
 
         public IEnumerable<SelectListItem> Categories { get; set; } = Enumerable.Empty<SelectListItem>();
     }

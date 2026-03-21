@@ -1,0 +1,104 @@
+﻿@model ItemFormViewModel
+
+@{
+    ViewData["Title"] = "Редакция на артикул";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                    <div>
+                        <h1 class="mb-1">Редакция на артикул</h1>
+                        <p class="text-muted mb-0">Редакцията е достъпна само за администратор, след като артикулът вече е одобрен за магазина.</p>
+                    </div>
+                    <a asp-action="Details" asp-route-itemId="@Model.Id" class="btn btn-outline-dark">Към детайли</a>
+                </div>
+
+                <form asp-action="Edit" asp-route-itemId="@Model.Id" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.ExistingMainPicUrl))
+                    {
+                        <div class="mb-4">
+                            <h2 class="h5">Текущи снимки</h2>
+                            <div class="row g-3">
+                                @foreach (var picture in Model.ExistingPictures)
+                                {
+                                    <div class="col-6 col-md-4 col-xl-3">
+                                        <img src="@picture" class="img-fluid rounded shadow-sm h-100 w-100" style="object-fit: cover; min-height: 180px;" alt="Снимка на @Model.Name" />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="Name" class="form-label">Име на артикул</label>
+                            <input asp-for="Name" class="form-control" placeholder="Например: Старинен джобен часовник" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="CategoryId" class="form-label"></label>
+                            <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select">
+                                <option value="0">-- Избери категория --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Price" class="form-label">Цена</label>
+                            <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Condition" class="form-label">Състояние</label>
+                            <input asp-for="Condition" class="form-control" placeholder="Отлично, много добро, реставрирано..." />
+                            <span asp-validation-for="Condition" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="YearOrPeriod" class="form-label">Година или период</label>
+                            <input asp-for="YearOrPeriod" class="form-control" placeholder="Напр. 1940-те години" />
+                            <span asp-validation-for="YearOrPeriod" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label">Описание</label>
+                            <textarea asp-for="Description" class="form-control" rows="5" placeholder="Опиши произход, история, особености и състояние..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="MainPicFile" class="form-label">Нова главна снимка</label>
+                            <input asp-for="MainPicFile" class="form-control" accept="image/*" />
+                            <div class="form-text">Остави празно, ако искаш да запазиш сегашната главна снимка.</div>
+                            <span asp-validation-for="MainPicFile" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="PicturesFiles" class="form-label">Нови допълнителни снимки</label>
+                            <input asp-for="PicturesFiles" class="form-control" accept="image/*" multiple />
+                            <div class="form-text">Новите снимки ще бъдат добавени към съществуващата галерия.</div>
+                            <span asp-validation-for="PicturesFiles" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 justify-content-between mt-4">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Отказ</a>
+                        <button type="submit" class="btn btn-dark px-4">Запази промените</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

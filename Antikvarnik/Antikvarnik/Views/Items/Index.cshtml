@@ -17,6 +17,10 @@
         <a asp-controller="Items" asp-action="Add" class="btn btn-outline-dark">Добави оферта</a>
     }
 </div>
+@if (TempData["StatusMessage"] is string message)
+{
+    <div class="alert alert-success">@message</div>
+}
 
 @if (Model.Length == 0)
 {
@@ -61,6 +65,10 @@ else
                         <div class="d-flex flex-wrap gap-2 mt-3">
                             <a asp-controller="Items" asp-action="Details" asp-route-itemId="@item.Id" class="btn btn-warning">Детайли</a>
 
+                            @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+                            {
+                                <a asp-controller="Items" asp-action="Edit" asp-route-itemId="@item.Id" class="btn btn-outline-primary">Редакция</a>
+                            }
 
                             @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
                             {

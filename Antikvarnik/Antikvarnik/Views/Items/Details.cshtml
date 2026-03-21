@@ -68,7 +68,12 @@
 
 
                 <h2 class="h5">Описание</h2>
-                <p class="mb-0">@Model.Description</p>
+                <p class="mb-4">@Model.Description</p>
+
+                @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+                {
+                    <a asp-action="Edit" asp-route-itemId="@Model.Id" class="btn btn-outline-primary">Редактирай артикула</a>
+                }
             </div>
         </div>
     </div>
