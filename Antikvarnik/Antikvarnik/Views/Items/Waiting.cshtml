@@ -36,7 +36,8 @@ else
                         </div>
 
                         <p class="text-muted small mb-1">Категория: @(item.Category?.Name ?? "Без категория")</p>
-                        <p class="text-muted small mb-2">Подаден от: @(item.Seller?.Email ?? "Неизвестен потребител")</p>
+                        <p class="text-muted small mb-1">Подаден от (username): @(item.Seller?.UserName ?? "Неизвестен потребител")</p>
+                        <p class="text-muted small mb-2">Телефон: @(item.Seller?.PhoneNumber ?? "Няма посочен")</p>
                         <p class="mb-2"><strong>Цена:</strong> @item.Price.ToString("F2") лв.</p>
                         <p class="mb-2"><strong>Състояние:</strong> @item.Condition</p>
                         <p class="card-text text-muted flex-grow-1">@item.Description</p>

@@ -26,7 +26,8 @@ namespace Antikvarnik.Data
 
         public DbSet<OfferMessage> OfferMessages { get; set; }
 
-        public DbSet<Reservation> Reservations { get; set; }
+        
+        public DbSet<Favorite> Favorites { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -48,9 +49,7 @@ namespace Antikvarnik.Data
                 .Property(o => o.Status)
                 .HasConversion<string>();
 
-            builder.Entity<Reservation>()
-                .Property(r => r.Status)
-                .HasConversion<string>();
+            
 
             builder.Entity<Item>()
                 .HasOne(i => i.Category)
@@ -106,23 +105,7 @@ namespace Antikvarnik.Data
                 .HasForeignKey(om => om.SenderId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<Reservation>()
-                .HasOne(r => r.Item)
-                .WithMany(i => i.Reservations)
-                .HasForeignKey(r => r.ItemId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<Reservation>()
-                .HasOne(r => r.User)
-                .WithMany(u => u.Reservations)
-                .HasForeignKey(r => r.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<Reservation>()
-                .HasOne(r => r.ProcessedByAdmin)
-                .WithMany(u => u.ProcessedReservations)
-                .HasForeignKey(r => r.ProcessedByAdminId)
-                .OnDelete(DeleteBehavior.Restrict);
+            
 
             builder.Entity<Category>().HasData(
                 new Category { Id = 1, Name = "Монети", Description = "Редки монети и нумизматични ценности." },

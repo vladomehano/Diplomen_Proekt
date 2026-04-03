@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = "Каталог";
+    var favoriteItemIds = (ViewBag.FavoriteItemIds as int[]) ?? Array.Empty<int>();
 }
 
 
@@ -64,6 +65,18 @@ else
     
                         <div class="d-flex flex-wrap gap-2 mt-3">
                             <a asp-controller="Items" asp-action="Details" asp-route-itemId="@item.Id" class="btn btn-warning">Детайли</a>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                var isFavorite = favoriteItemIds.Contains(item.Id);
+                                <form asp-controller="Favorites" asp-action="Toggle" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="itemId" value="@item.Id" />
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                    <button type="submit" class="btn @(isFavorite ? "btn-danger" : "btn-outline-danger")">
+                                        @(isFavorite ? "Премахни от любими" : "Добави в любими")
+                                    </button>
+                                </form>
+                            }
 
                             @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
                             {

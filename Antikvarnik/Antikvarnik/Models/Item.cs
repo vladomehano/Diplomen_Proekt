@@ -52,7 +52,7 @@ namespace Antikvarnik.Models
 
         public ICollection<ItemImage> Images { get; set; } = new List<ItemImage>();
 
-        public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
+        public ICollection<Favorite> FavoritedByUsers { get; set; } = new List<Favorite>();
 
         public string MainPicUrl => Images
             .OrderByDescending(i => i.IsMain)

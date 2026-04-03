@@ -4,6 +4,7 @@ using Antikvarnik.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Antikvarnik.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260330151452_add_favorites")]
+    partial class add_favorites
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -331,6 +334,45 @@ namespace Antikvarnik.Migrations
                     b.ToTable("OfferMessages");
                 });
 
+            modelBuilder.Entity("Antikvarnik.Models.Reservation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProcessedByAdminId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("ProcessedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ReservedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("ProcessedByAdminId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Reservations");
+                });
+
             modelBuilder.Entity("Antikvarnik.Models.Review", b =>
                 {
                     b.Property<int>("Id")
@@ -596,6 +638,32 @@ namespace Antikvarnik.Migrations
                     b.Navigation("Sender");
                 });
 
+            modelBuilder.Entity("Antikvarnik.Models.Reservation", b =>
+                {
+                    b.HasOne("Antikvarnik.Models.Item", "Item")
+                        .WithMany("Reservations")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Antikvarnik.Models.AppUser", "ProcessedByAdmin")
+                        .WithMany("ProcessedReservations")
+                        .HasForeignKey("ProcessedByAdminId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Antikvarnik.Models.AppUser", "User")
+                        .WithMany("Reservations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("ProcessedByAdmin");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Antikvarnik.Models.Review", b =>
                 {
                     b.HasOne("Antikvarnik.Models.AppUser", "User")
@@ -668,6 +736,10 @@ namespace Antikvarnik.Migrations
 
                     b.Navigation("Offers");
 
+                    b.Navigation("ProcessedReservations");
+
+                    b.Navigation("Reservations");
+
                     b.Navigation("ReservedItems");
 
                     b.Navigation("Reviews");
@@ -685,6 +757,8 @@ namespace Antikvarnik.Migrations
                     b.Navigation("FavoritedByUsers");
 
                     b.Navigation("Images");
+
+                    b.Navigation("Reservations");
                 });
 
             modelBuilder.Entity("Antikvarnik.Models.Offer", b =>

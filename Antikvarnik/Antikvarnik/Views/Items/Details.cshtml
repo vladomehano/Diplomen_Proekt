@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Детайли за артикул";
     var images = Model.Pictures;
+    var isFavorite = (ViewBag.IsFavorite as bool?) ?? false;
 }
 
 @if (TempData["StatusMessage"] is string message)
@@ -78,21 +79,21 @@
                     @if (Model.Status == Antikvarnik.Models.Enums.ItemStatus.Available)
                     {
                         @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <form asp-controller="Reservations" asp-action="Create" method="post" class="d-inline">
+                            {
+                                <form asp-controller="Items" asp-action="Buy" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
-                                <input type="hidden" name="itemId" value="@Model.Id" />
-                                <button type="submit" class="btn btn-success">Заяви покупка</button>
-                            </form>
+                                    <input type="hidden" name="itemId" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-success">Купи/Поръчай</button>
+                                </form>
                         }
                         else
                         {
-                            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-success">Влез, за да заявиш покупка</a>
+                            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-success">Влез, за да купиш</a>
                         }
                     }
                     else if (Model.Status == Antikvarnik.Models.Enums.ItemStatus.Reserved)
                     {
-                        <span class="btn btn-outline-warning disabled">Артикулът е резервиран</span>
+                        <span class="btn btn-outline-warning disabled">Артикулът е в процес на поръчка</span>
                     }
                     else if (Model.Status == Antikvarnik.Models.Enums.ItemStatus.Sold)
                     {
@@ -102,6 +103,17 @@
                     @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
                     {
                         <a asp-action="Edit" asp-route-itemId="@Model.Id" class="btn btn-outline-primary">Редактирай артикула</a>
+                    }
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <form asp-controller="Favorites" asp-action="Toggle" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="itemId" value="@Model.Id" />
+                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                            <button type="submit" class="btn @(isFavorite ? "btn-danger" : "btn-outline-danger")">
+                                @(isFavorite ? "Премахни от любими" : "Добави в любими")
+                            </button>
+                        </form>
                     }
                 </div>
             </div>

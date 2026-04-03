@@ -33,7 +33,7 @@ namespace Antikvarnik.Controllers
         public async Task<IActionResult> Index()
         {
             var currentUser = await userManager.GetUserAsync(User);
-            var isAdmin = User.IsInRole("Admin");
+            
             var currentUserId = currentUser?.Id;
 
             Item[] items = await dbc.Items
@@ -43,11 +43,17 @@ namespace Antikvarnik.Controllers
                 .Where(i => !i.IsDeleted &&
                     (i.Status == ItemStatus.Available ||
                      i.Status == ItemStatus.Reserved ||
-                     i.Status == ItemStatus.Sold ||
-                     ((currentUserId != null && i.SellerId == currentUserId) && i.Status == ItemStatus.Waiting) ||
-                     (isAdmin && i.Status == ItemStatus.Waiting)))
+                     i.Status == ItemStatus.Sold))
                 .OrderByDescending(i => i.CreatedOn)
                 .ToArrayAsync();
+            if (currentUserId != null)
+            {
+                ViewBag.FavoriteItemIds = await dbc.Favorites
+                    .AsNoTracking()
+                    .Where(f => f.UserId == currentUserId)
+                    .Select(f => f.ItemId)
+                    .ToArrayAsync();
+            }
 
             return View(items);
         }
@@ -67,6 +73,14 @@ namespace Antikvarnik.Controllers
             if (!await CanViewItemAsync(item))
             {
                 return Forbid();
+            }
+
+            var currentUser = await userManager.GetUserAsync(User);
+            if (currentUser?.Id != null)
+            {
+                ViewBag.IsFavorite = await dbc.Favorites
+                    .AsNoTracking()
+                    .AnyAsync(f => f.UserId == currentUser.Id && f.ItemId == item.Id);
             }
 
             return View(item);
@@ -268,6 +282,39 @@ namespace Antikvarnik.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Buy(int itemId)
+        {
+            var currentUser = await userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Challenge();
+            }
+
+            var item = await dbc.Items.FirstOrDefaultAsync(i => i.Id == itemId && !i.IsDeleted);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            if (item.Status != ItemStatus.Available)
+            {
+                TempData["StatusMessage"] = "Този артикул вече не е наличен за покупка.";
+                return RedirectToAction(nameof(Details), new { itemId });
+            }
+
+            item.Status = ItemStatus.Sold;
+            item.ReservedByUserId = currentUser.Id;
+            item.UpdatedOn = DateTime.UtcNow;
+
+            await dbc.SaveChangesAsync();
+
+            TempData["StatusMessage"] = $"Поръчката за \"{item.Name}\" е приета успешно.";
+            return RedirectToAction(nameof(Details), new { itemId });
         }
 
         // GET: Items/Deleted

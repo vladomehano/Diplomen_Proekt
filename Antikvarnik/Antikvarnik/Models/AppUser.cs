@@ -19,8 +19,7 @@ namespace Antikvarnik.Models
 
         public ICollection<OfferMessage> SentOfferMessages { get; set; } = new List<OfferMessage>();
 
-        public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
-
-        public ICollection<Reservation> ProcessedReservations { get; set; } = new List<Reservation>();
+        
+        public ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
     }
 }
