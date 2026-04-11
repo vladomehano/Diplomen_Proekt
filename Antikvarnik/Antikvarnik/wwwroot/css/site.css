@@ -20,3 +20,40 @@ html {
 body {
   margin-bottom: 60px;
 }
+.contact-page .quick-contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+}
+
+.contact-page .quick-contact-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    text-decoration: none;
+    font-weight: 600;
+    color: #0f5132;
+    background: #e8f5ee;
+    border: 1px solid #c7e9d6;
+    border-radius: 999px;
+    padding: 0.45rem 0.85rem;
+}
+
+    .contact-page .quick-contact-item:hover {
+        background: #d8efdf;
+        color: #0b3b25;
+    }
+.contact-page .map-frame {
+    border-radius: 0.75rem;
+    border-color: #b6e2ca !important;
+    box-shadow: 0 8px 22px rgba(25, 135, 84, 0.12);
+}
+@media (min-width: 768px) {
+    .contact-page .contact-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .contact-page .map-frame-wide {
+        aspect-ratio: 2.2 / 1;
+    }
+}

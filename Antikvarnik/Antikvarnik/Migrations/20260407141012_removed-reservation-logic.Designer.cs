@@ -4,6 +4,7 @@ using Antikvarnik.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Antikvarnik.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260407141012_removed-reservation-logic")]
+    partial class removedreservationlogic
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -256,38 +259,6 @@ namespace Antikvarnik.Migrations
                     b.ToTable("ItemImages");
                 });
 
-            modelBuilder.Entity("Antikvarnik.Models.ItemMessage", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("MessageText")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("SenderId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("SentOn")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ItemId");
-
-                    b.HasIndex("SenderId");
-
-                    b.ToTable("ItemMessages");
-                });
-
             modelBuilder.Entity("Antikvarnik.Models.Offer", b =>
                 {
                     b.Property<int>("Id")
@@ -311,8 +282,9 @@ namespace Antikvarnik.Migrations
                     b.Property<decimal>("RequestedPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -327,7 +299,7 @@ namespace Antikvarnik.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Offer");
+                    b.ToTable("Offers");
                 });
 
             modelBuilder.Entity("Antikvarnik.Models.OfferMessage", b =>
@@ -359,7 +331,7 @@ namespace Antikvarnik.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("OfferMessage");
+                    b.ToTable("OfferMessages");
                 });
 
             modelBuilder.Entity("Antikvarnik.Models.Review", b =>
@@ -597,31 +569,12 @@ namespace Antikvarnik.Migrations
                     b.Navigation("Item");
                 });
 
-            modelBuilder.Entity("Antikvarnik.Models.ItemMessage", b =>
-                {
-                    b.HasOne("Antikvarnik.Models.Item", "Item")
-                        .WithMany("Messages")
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Antikvarnik.Models.AppUser", "Sender")
-                        .WithMany("SentItemMessages")
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Item");
-
-                    b.Navigation("Sender");
-                });
-
             modelBuilder.Entity("Antikvarnik.Models.Offer", b =>
                 {
                     b.HasOne("Antikvarnik.Models.AppUser", "User")
                         .WithMany("Offers")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
@@ -722,8 +675,6 @@ namespace Antikvarnik.Migrations
 
                     b.Navigation("Reviews");
 
-                    b.Navigation("SentItemMessages");
-
                     b.Navigation("SentOfferMessages");
                 });
 
@@ -737,8 +688,6 @@ namespace Antikvarnik.Migrations
                     b.Navigation("FavoritedByUsers");
 
                     b.Navigation("Images");
-
-                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("Antikvarnik.Models.Offer", b =>

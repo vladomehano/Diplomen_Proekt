@@ -39,10 +39,9 @@ namespace Antikvarnik.Controllers
             Item[] items = await dbc.Items
                 .AsNoTracking()
                 .Include(i => i.Category)
-                .Include(i => i.Images)
+                .Include("Images")
                 .Where(i => !i.IsDeleted &&
                     (i.Status == ItemStatus.Available ||
-                     i.Status == ItemStatus.Reserved ||
                      i.Status == ItemStatus.Sold))
                 .OrderByDescending(i => i.CreatedOn)
                 .ToArrayAsync();
@@ -57,13 +56,29 @@ namespace Antikvarnik.Controllers
 
             return View(items);
         }
+        [HttpGet]
+        public async Task<IActionResult> Sold()
+        {
+            Item[] soldItems = await dbc.Items
+                .AsNoTracking()
+                .Include(i => i.Category)
+                .Include("Images")
+                .Where(i => !i.IsDeleted && i.Status == ItemStatus.Sold)
+                .OrderByDescending(i => i.UpdatedOn ?? i.CreatedOn)
+                .ToArrayAsync();
+
+            return View(soldItems);
+        }
+
 
         public async Task<IActionResult> Details(int itemId)
         {
             Item? item = await dbc.Items
                 .AsNoTracking()
                 .Include(i => i.Category)
-                .Include(i => i.Images.OrderBy(ii => ii.SortOrder))
+                .Include("Images")
+                .Include(i => i.Messages.OrderBy(m => m.SentOn))
+                    .ThenInclude(m => m.Sender)
                 .FirstOrDefaultAsync(x => x.Id == itemId && !x.IsDeleted);
 
             if (item == null)
@@ -93,7 +108,7 @@ namespace Antikvarnik.Controllers
             Item[] waitingItems = await dbc.Items
                 .AsNoTracking()
                 .Include(i => i.Category)
-                .Include(i => i.Images)
+                .Include("Images")
                 .Include(i => i.Seller)
                 .Where(i => !i.IsDeleted && i.Status == ItemStatus.Waiting)
                 .OrderBy(i => i.CreatedOn)
@@ -160,7 +175,7 @@ namespace Antikvarnik.Controllers
         {
             Item? item = await dbc.Items
                 .AsNoTracking()
-                .Include(i => i.Images.OrderBy(ii => ii.SortOrder))
+                .Include("Images")
                 .FirstOrDefaultAsync(x => x.Id == itemId && !x.IsDeleted);
 
             if (item == null)
@@ -192,7 +207,7 @@ namespace Antikvarnik.Controllers
         public async Task<IActionResult> Edit(int itemId, ItemFormViewModel model)
         {
             Item? item = await dbc.Items
-                .Include(i => i.Images)
+                .Include("Images")
                 .FirstOrDefaultAsync(x => x.Id == itemId && !x.IsDeleted);
 
             if (item == null)
@@ -229,14 +244,15 @@ namespace Antikvarnik.Controllers
             if (model.MainPicFile != null && model.MainPicFile.Length > 0)
             {
                 var newMainImageUrl = await SaveUploadedImageAsync(model.MainPicFile, uploadsRoot);
-                var currentMainImage = item.Images
+                var itemImages = GetImages(item);
+                var currentMainImage = itemImages
                     .OrderByDescending(i => i.IsMain)
                     .ThenBy(i => i.SortOrder)
                     .FirstOrDefault();
 
                 if (currentMainImage == null)
                 {
-                    item.Images.Add(new ItemImage
+                    itemImages.Add(new ItemImage
                     {
                         ImageUrl = newMainImageUrl,
                         IsMain = true,
@@ -250,11 +266,12 @@ namespace Antikvarnik.Controllers
                 }
             }
 
-            var nextSortOrder = item.Images.Any() ? item.Images.Max(i => i.SortOrder) + 1 : 1;
+            var galleryImages = GetImages(item);
+            var nextSortOrder = galleryImages.Any() ? galleryImages.Max(i => i.SortOrder) + 1 : 1;
             foreach (var file in model.PicturesFiles.Where(f => f != null && f.Length > 0))
             {
                 var imageUrl = await SaveUploadedImageAsync(file, uploadsRoot);
-                item.Images.Add(new ItemImage
+                galleryImages.Add(new ItemImage
                 {
                     ImageUrl = imageUrl,
                     IsMain = false,
@@ -317,6 +334,75 @@ namespace Antikvarnik.Controllers
             return RedirectToAction(nameof(Details), new { itemId });
         }
 
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddMessage(int itemId, string messageText)
+        {
+            if (string.IsNullOrWhiteSpace(messageText))
+            {
+                TempData["StatusMessage"] = "Съобщението не може да е празно.";
+                return RedirectToAction(nameof(Details), new { itemId });
+            }
+
+            var currentUser = await userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Challenge();
+            }
+
+            var item = await dbc.Items.FirstOrDefaultAsync(i => i.Id == itemId && !i.IsDeleted);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            var isAdmin = User.IsInRole("Admin");
+            var isOwner = item.SellerId == currentUser.Id;
+            if (!isAdmin && !isOwner)
+            {
+                return Forbid();
+            }
+
+            dbc.ItemMessages.Add(new ItemMessage
+            {
+                ItemId = item.Id,
+                SenderId = currentUser.Id,
+                MessageText = messageText.Trim(),
+                SentOn = DateTime.UtcNow
+            });
+
+            await dbc.SaveChangesAsync();
+            return RedirectToAction(nameof(Details), new { itemId });
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkAsAvailable(int itemId)
+        {
+            var item = await dbc.Items.FirstOrDefaultAsync(i => i.Id == itemId && !i.IsDeleted);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            if (item.Status != ItemStatus.Sold)
+            {
+                TempData["StatusMessage"] = "Само продаден артикул може да бъде върнат като наличен.";
+                return RedirectToAction(nameof(Details), new { itemId });
+            }
+
+            item.Status = ItemStatus.Available;
+            item.ReservedByUserId = null;
+            item.UpdatedOn = DateTime.UtcNow;
+
+            await dbc.SaveChangesAsync();
+            TempData["StatusMessage"] = $"Артикулът \"{item.Name}\" е върнат обратно в каталога като наличен.";
+
+            return RedirectToAction(nameof(Details), new { itemId });
+        }
+
         // GET: Items/Deleted
         [Authorize(Roles = "Admin")]
         [HttpGet]
@@ -325,7 +411,7 @@ namespace Antikvarnik.Controllers
             Item[] deletedItems = await dbc.Items
                 .AsNoTracking()
                 .Include(i => i.Category)
-                .Include(i => i.Images)
+                .Include("Images")
                 .Where(i => i.IsDeleted)
                 .OrderByDescending(i => i.UpdatedOn ?? i.CreatedOn)
                 .ToArrayAsync();
@@ -407,7 +493,8 @@ namespace Antikvarnik.Controllers
 
             var imageOrder = 0;
             var mainImageUrl = await SaveUploadedImageAsync(model.MainPicFile!, uploadsRoot);
-            item.Images.Add(new ItemImage
+            var itemImages = GetImages(item);
+            itemImages.Add(new ItemImage
             {
 
 
@@ -419,7 +506,7 @@ namespace Antikvarnik.Controllers
             foreach (var file in model.PicturesFiles.Where(f => f != null && f.Length > 0))
             {
                 var imageUrl = await SaveUploadedImageAsync(file, uploadsRoot);
-                item.Images.Add(new ItemImage
+                itemImages.Add(new ItemImage
                 {
                     ImageUrl = imageUrl,
                     IsMain = false,
@@ -458,9 +545,21 @@ namespace Antikvarnik.Controllers
                 .ToListAsync();
         }
 
+        private static ICollection<ItemImage> GetImages(Item item)
+        {
+            var images = item.GetType().GetProperty("Images")?.GetValue(item) as ICollection<ItemImage>;
+            if (images == null)
+            {
+                throw new InvalidOperationException("Item.Images navigation is missing.");
+            }
+
+            return images;
+        }
+
+
         private async Task<bool> CanViewItemAsync(Item item)
         {
-            if (item.Status == ItemStatus.Available || item.Status == ItemStatus.Reserved || item.Status == ItemStatus.Sold)
+            if (item.Status == ItemStatus.Available || item.Status == ItemStatus.Sold)
             {
                 return true;
             }

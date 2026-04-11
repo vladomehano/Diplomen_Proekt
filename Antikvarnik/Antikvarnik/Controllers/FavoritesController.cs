@@ -34,9 +34,9 @@ namespace Antikvarnik.Controllers
      .Include(i => i.Category)
      .Include(i => i.Images)
      .Where(i => !i.IsDeleted &&
-         i.FavoritedByUsers.Any(f => f.UserId == currentUser.Id) &&
-         (i.Status == ItemStatus.Available || i.Status == ItemStatus.Reserved || i.Status == ItemStatus.Sold))
-     .OrderByDescending(i => i.CreatedOn)
+    i.FavoritedByUsers.Any(f => f.UserId == currentUser.Id) &&
+    (i.Status == ItemStatus.Available || i.Status == ItemStatus.Sold))
+.OrderByDescending(i => i.CreatedOn)
      .ToArrayAsync();
 
             return View(items);

@@ -4,6 +4,8 @@
     ViewData["Title"] = "Детайли за артикул";
     var images = Model.Pictures;
     var isFavorite = (ViewBag.IsFavorite as bool?) ?? false;
+    var canDiscuss = User.Identity?.IsAuthenticated == true &&
+        (User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.SellerId);
 }
 
 @if (TempData["StatusMessage"] is string message)
@@ -91,9 +93,9 @@
                             <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-success">Влез, за да купиш</a>
                         }
                     }
-                    else if (Model.Status == Antikvarnik.Models.Enums.ItemStatus.Reserved)
+                    else if (Model.Status == Antikvarnik.Models.Enums.ItemStatus.Sold)
                     {
-                        <span class="btn btn-outline-warning disabled">Артикулът е в процес на поръчка</span>
+                        <span class="btn btn-outline-secondary disabled">Артикулът е продаден</span>
                     }
                     else if (Model.Status == Antikvarnik.Models.Enums.ItemStatus.Sold)
                     {
@@ -103,6 +105,14 @@
                     @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
                     {
                         <a asp-action="Edit" asp-route-itemId="@Model.Id" class="btn btn-outline-primary">Редактирай артикула</a>
+                    }
+                    @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin") && Model.Status == Antikvarnik.Models.Enums.ItemStatus.Sold)
+                    {
+                        <form asp-controller="Items" asp-action="MarkAsAvailable" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="itemId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-outline-success">Върни като наличен</button>
+                        </form>
                     }
                     @if (User.Identity?.IsAuthenticated == true)
                     {
@@ -120,3 +130,41 @@
         </div>
     </div>
 </div>
+
+@if (canDiscuss && Model.Status == Antikvarnik.Models.Enums.ItemStatus.Waiting)
+{
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-body">
+            <h2 class="h5">Комуникация по офертата (консенсус)</h2>
+
+            @if (Model.Messages.Count == 0)
+            {
+                <p class="text-muted">Все още няма съобщения.</p>
+            }
+            else
+            {
+                <div class="d-flex flex-column gap-2 mb-3">
+                    @foreach (var msg in Model.Messages.OrderBy(m => m.SentOn))
+                    {
+                        <div class="border rounded p-2">
+                            <div class="small text-muted mb-1">
+                                @(msg.Sender?.UserName ?? msg.Sender?.Email ?? "Потребител")
+                                • @msg.SentOn.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                            </div>
+                            <div>@msg.MessageText</div>
+                        </div>
+                    }
+                </div>
+            }
+
+            <form asp-controller="Items" asp-action="AddMessage" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="itemId" value="@Model.Id" />
+                <div class="mb-2">
+                    <textarea name="messageText" class="form-control" rows="3" maxlength="1000" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-success btn-sm">Изпрати съобщение</button>
+            </form>
+        </div>
+    </div>
+}

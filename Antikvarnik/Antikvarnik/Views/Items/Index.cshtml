@@ -35,7 +35,7 @@ else
             var badgeClass = item.Status switch
             {
                 ItemStatus.Available => "bg-success",
-                ItemStatus.Reserved => "bg-warning text-dark",
+                
                 ItemStatus.Sold => "bg-secondary",
                 ItemStatus.Waiting => "bg-info text-dark",
                 _ => "bg-danger"
@@ -81,6 +81,14 @@ else
                             @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
                             {
                                 <a asp-controller="Items" asp-action="Edit" asp-route-itemId="@item.Id" class="btn btn-outline-primary">Редакция</a>
+                            }
+                            @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin") && item.Status == ItemStatus.Sold)
+                            {
+                                <form asp-controller="Items" asp-action="MarkAsAvailable" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="itemId" value="@item.Id" />
+                                    <button type="submit" class="btn btn-outline-success">Върни като наличен</button>
+                                </form>
                             }
 
                             @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))

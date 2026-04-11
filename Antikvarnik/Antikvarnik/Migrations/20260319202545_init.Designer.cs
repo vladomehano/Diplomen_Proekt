@@ -587,7 +587,7 @@ namespace Antikvarnik.Migrations
                     b.HasOne("Antikvarnik.Models.Offer", "Offer")
                         .WithMany("Messages")
                         .HasForeignKey("OfferId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Antikvarnik.Models.AppUser", "Sender")

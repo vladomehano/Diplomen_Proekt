@@ -1,0 +1,55 @@
+﻿@using Antikvarnik.Models.Enums
+@model Item[]
+
+@{
+    ViewData["Title"] = "Продадени артикули";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h1 class="mb-1 text-secondary">Продадени артикули</h1>
+        <p class="text-muted mb-0">Архив на всички вече продадени предмети в магазина.</p>
+    </div>
+    <a asp-controller="Items" asp-action="Index" class="btn btn-outline-dark">Към наличните</a>
+</div>
+
+@if (Model.Length == 0)
+{
+    <div class="alert alert-info">Все още няма продадени артикули.</div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (Item item in Model)
+        {
+            <div class="col-md-6 col-xl-4">
+                <article class="card h-100 shadow-sm border-0">
+                    <img src="@item.MainPicUrl" class="card-img-top" alt="@item.Name" style="height: 260px; object-fit: cover;">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h3 class="h5 mb-0">@item.Name</h3>
+                            <span class="badge bg-secondary">@ItemStatus.Sold</span>
+                        </div>
+
+                        <p class="text-muted small mb-2">Категория: @(item.Category?.Name ?? "Без категория")</p>
+                        <p class="mb-2"><strong>Цена:</strong> @item.Price.ToString("F2") лв.</p>
+                        <p class="mb-2"><strong>Състояние:</strong> @item.Condition</p>
+                        <p class="card-text text-muted flex-grow-1">@item.Description</p>
+
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            <a asp-controller="Items" asp-action="Details" asp-route-itemId="@item.Id" class="btn btn-warning">Детайли</a>
+                            @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+                            {
+                                <form asp-controller="Items" asp-action="MarkAsAvailable" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="itemId" value="@item.Id" />
+                                    <button type="submit" class="btn btn-outline-success">Върни като наличен</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </article>
+            </div>
+        }
+    </div>
+}

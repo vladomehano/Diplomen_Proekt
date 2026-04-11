@@ -1,31 +1,66 @@
 ﻿@{
     ViewData["Title"] = "Контакти и как да закупя";
 }
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-4">
-                <h1 class="mb-4">Контакти и как да закупя</h1>
+<div class="row justify-content-center contact-page">
+    <div class="col-xl-10">
+        <div class="card border-0 shadow contact-card">
+            <div class="card-body p-4 p-lg-5">
+                <h1 class="mb-2">Контакти и как да закупя</h1>
+                <p class="text-secondary mb-4">Всичко най-важно за покупката и връзка с нас на едно място.</p>
+                <div class="quick-contact mb-4">
+                    <a class="quick-contact-item" href="tel:+359881234567">📞 +359 88 123 4567</a>
+                    <a class="quick-contact-item" href="mailto:antikvarnik@example.com">✉️ antikvarnik@example.com</a>
+                    <a class="quick-contact-item" href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">📘 Facebook</a>
+                </div>
+                <div class="contact-section mb-4">
+                    <h2 class="h5 section-title">Как става покупката?</h2>
+                    <p class="mb-0">
+                        Покупката на артикул е директна. Когато потребителят натисне бутона за покупка,
+                        артикулът се маркира като <strong>Sold</strong> и вече не е наличен за други клиенти.
+                    </p>
+                </div>
 
-                <p>
-                    Покупката на артикул преминава през администраторска обработка. Потребителят заявява интерес,
-                    артикулът преминава в статус <strong>Reserved</strong>, а след потвърждение от администратор се маркира като <strong>Sold</strong>.
-                </p>
 
-                <h2 class="h5 mt-4">Стъпки за покупка</h2>
-                <ol>
-                    <li>Избери артикул от каталога.</li>
-                    <li>Подай заявка за покупка/резервация.</li>
-                    <li>Изчакай потвърждение от администратор.</li>
-                    <li>Плащането и доставката се уточняват по телефон или имейл.</li>
-                </ol>
+                <div class="contact-section mb-4">
+                    <h2 class="h5 section-title">Стъпки за покупка</h2>
+                    <ol class="purchase-steps">
+                        <li>Избери артикул от каталога.</li>
+                        <li>Натисни бутона „Купи/Поръчай“.</li>
+                        <li>Ще получиш потвърждение, че поръчката е приета.</li>
+                        <li>Плащането и доставката се уточняват по телефон или имейл.</li>
+                    </ol>
+                </div>
 
-                <h2 class="h5 mt-4">Контакти</h2>
-                <ul class="mb-0">
-                    <li>Имейл: antikvarnik@example.com</li>
-                    <li>Телефон: +359 88 123 4567</li>
-                    <li>Работно време: Понеделник – Петък, 09:00 – 18:00</li>
-                </ul>
+
+              
+
+                <div class="contact-section mb-4">
+                    <h2 class="h5 section-title">Контакти</h2>
+                    <div class="contact-grid">
+                        <div class="contact-item"><strong>Имейл:</strong> antikvarnik@example.com</div>
+                        <div class="contact-item"><strong>Телефон:</strong> +359 88 123 4567</div>
+                        <div class="contact-item">
+                            <strong>Facebook:</strong>
+                            <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">facebook.com/antikvarnik</a>
+                        </div>
+                        <div class="contact-item"><strong>Работно време:</strong> Понеделник – Петък, 09:00 – 18:00</div>
+                    </div>
+                </div>
+
+                <div class="contact-section">
+                    <h2 class="h5 section-title">Локация на магазина</h2>
+                    <p class="text-muted">
+                        Можеш да ни намериш на картата по-долу. При нужда използвай Street View директно от Google Maps.
+                    </p>
+                    <div class="ratio ratio-16x9 rounded overflow-hidden shadow-sm border map-frame map-frame-wide">
+                        <iframe src="https://www.google.com/maps/embed?pb=!4v1775565918516!6m8!1m7!1sCAoSFkNJSE0wb2dLRUlDQWdJRGh3ODJPR0E.!2m2!1d43.26014448437817!2d26.93604878085058!3f281.55711269309506!4f10.556408616389717!5f0.5082919531308163"
+                                title="Локация на магазин Antikvarnik в Google Maps"
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade"
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

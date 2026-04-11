@@ -21,5 +21,7 @@ namespace Antikvarnik.Models
 
         
         public ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
+
+        public ICollection<ItemMessage> SentItemMessages { get; set; } = new List<ItemMessage>();
     }
 }

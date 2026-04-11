@@ -1,5 +1,4 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Antikvarnik.Models.Enums;
 
 namespace Antikvarnik.Models
@@ -53,6 +52,8 @@ namespace Antikvarnik.Models
         public ICollection<ItemImage> Images { get; set; } = new List<ItemImage>();
 
         public ICollection<Favorite> FavoritedByUsers { get; set; } = new List<Favorite>();
+
+        public ICollection<ItemMessage> Messages { get; set; } = new List<ItemMessage>();
 
         public string MainPicUrl => Images
             .OrderByDescending(i => i.IsMain)

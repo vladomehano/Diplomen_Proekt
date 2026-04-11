@@ -22,12 +22,11 @@ namespace Antikvarnik.Data
 
         public DbSet<Review> Reviews { get; set; }
 
-        public DbSet<Offer> Offers { get; set; }
-
-        public DbSet<OfferMessage> OfferMessages { get; set; }
+        
 
         
         public DbSet<Favorite> Favorites { get; set; }
+        public DbSet<ItemMessage> ItemMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -37,19 +36,9 @@ namespace Antikvarnik.Data
                 .Property(i => i.Price)
                 .HasColumnType("decimal(18,2)");
 
-            builder.Entity<Offer>()
-                .Property(o => o.RequestedPrice)
-                .HasColumnType("decimal(18,2)");
-
             builder.Entity<Item>()
                 .Property(i => i.Status)
                 .HasConversion<string>();
-
-            builder.Entity<Offer>()
-                .Property(o => o.Status)
-                .HasConversion<string>();
-
-            
 
             builder.Entity<Item>()
                 .HasOne(i => i.Category)
@@ -87,11 +76,25 @@ namespace Antikvarnik.Data
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<ItemMessage>()
+                .HasOne(im => im.Item)
+                .WithMany(i => i.Messages)
+                .HasForeignKey(im => im.ItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ItemMessage>()
+                .HasOne(im => im.Sender)
+                .WithMany(u => u.SentItemMessages)
+                .HasForeignKey(im => im.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // --- NEW: Configure Offer / OfferMessage to avoid multiple cascade paths ---
             builder.Entity<Offer>()
                 .HasOne(o => o.User)
                 .WithMany(u => u.Offers)
                 .HasForeignKey(o => o.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                // prevent cascade from User -> Offer -> OfferMessage and also User -> OfferMessage
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<OfferMessage>()
                 .HasOne(om => om.Offer)
@@ -103,9 +106,24 @@ namespace Antikvarnik.Data
                 .HasOne(om => om.Sender)
                 .WithMany(u => u.SentOfferMessages)
                 .HasForeignKey(om => om.SenderId)
+                // keep sender -> offerMessage from cascading to avoid multiple cascade paths
                 .OnDelete(DeleteBehavior.Restrict);
+            // ----------------------------------------------------------------------
 
-            
+            builder.Entity<Favorite>()
+                .HasKey(f => new { f.UserId, f.ItemId });
+
+            builder.Entity<Favorite>()
+                .HasOne(f => f.User)
+                .WithMany(u => u.Favorites)
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Favorite>()
+                .HasOne(f => f.Item)
+                .WithMany(i => i.FavoritedByUsers)
+                .HasForeignKey(f => f.ItemId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Category>().HasData(
                 new Category { Id = 1, Name = "Монети", Description = "Редки монети и нумизматични ценности." },

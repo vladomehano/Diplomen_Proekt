@@ -1,0 +1,86 @@
+﻿@model Review[]
+
+@{
+    ViewData["Title"] = "Книга на клиентите";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <div>
+        <h1 class="mb-1">Книга на клиентите</h1>
+        <p class="text-muted mb-0">Реални мнения и оценки от потребители на Antikvarnik.</p>
+    </div>
+</div>
+
+@if (TempData["ReviewStatusMessage"] is string message)
+{
+    <div class="alert alert-info">@message</div>
+}
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="h5">Остави отзив</h2>
+            <form asp-controller="Reviews" asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <label class="form-label">Оценка (1-5)</label>
+                    <select name="rating" class="form-select" required>
+                        <option value="5">5</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Текст</label>
+                    <textarea name="content" class="form-control" rows="3" maxlength="1000" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Публикувай отзив</button>
+            </form>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-secondary mb-4">
+        За да публикуваш отзив, <a asp-area="Identity" asp-page="/Account/Login">влез в профила си</a>.
+    </div>
+}
+
+@if (Model.Length == 0)
+{
+    <div class="alert alert-light border">Все още няма публикувани отзиви.</div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var review in Model)
+        {
+            <div class="col-12">
+                <article class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <div>
+                                <strong>@(review.User?.UserName ?? "Потребител")</strong>
+                                <div class="text-muted small">@review.CreatedOn.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</div>
+                            </div>
+                            <span class="badge bg-warning text-dark">Оценка: @review.Rating/5</span>
+                        </div>
+                        <p class="mb-0">@review.Content</p>
+
+                        @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+                        {
+                            <form asp-controller="Reviews" asp-action="Hide" method="post" class="mt-3">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="reviewId" value="@review.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Скрий отзив</button>
+                            </form>
+                        }
+                    </div>
+                </article>
+            </div>
+        }
+    </div>
+}
