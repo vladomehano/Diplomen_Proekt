@@ -1,5 +1,17 @@
+:root {
+    --bg-base: #f4f7fb;
+    --bg-surface: #ffffff;
+    --text-main: #172033;
+    --text-muted: #5a6478;
+    --primary: #1d4ed8;
+    --primary-soft: #dbeafe;
+    --border-soft: #d9e1ef;
+}
+
 html {
     font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
@@ -8,168 +20,268 @@ html {
     }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-    position: relative;
-    min-height: 100%;
-}
-
-body {
-    margin-bottom: 60px;
 
 
-font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
-background: linear-gradient(180deg, #f8fafc 0%, #ffffff 35%);
-color: #1f2937;
-}
-
-.navbar {
-    backdrop-filter: blur(8px);
-    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
-}
-
-.navbar-brand {
-    letter-spacing: 0.2px;
-}
-
-.card {
-    border-radius: 0.95rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1) !important;
+    body {
+        margin-bottom: 70px;
+        font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+        color: var(--text-main);
+        background: radial-gradient(circle at 12% 8%, rgba(59, 130, 246, 0.16), transparent 22%), radial-gradient(circle at 88% 0%, rgba(16, 185, 129, 0.13), transparent 24%), linear-gradient(180deg, #f8fbff 0%, var(--bg-base) 42%, #eef3fa 100%);
     }
 
-.btn {
-    border-radius: 0.7rem;
-    font-weight: 600;
-}
 
-.badge {
-    border-radius: 999px;
-    padding: 0.45rem 0.65rem;
-}
+        .btn:focus,
+        .btn:active:focus,
+        .btn-link.nav-link:focus,
+        .form-control:focus,
+        .form-check-input:focus,
+        .form-select:focus {
+            box-shadow: 0 0 0 0.1rem #fff, 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+        }
 
-.catalog-sort-select {
-    min-width: 250px;
-    border-radius: 0.65rem;
-    border-color: #cbd5e1;
-}
+       
 
-    .catalog-sort-select:focus {
-        border-color: #16a34a;
-        box-shadow: 0 0 0 0.2rem rgba(22, 163, 74, 0.15);
-    }
+            .app-shell {
+                background: rgba(255, 255, 255, 0.7);
+                border: 1px solid rgba(255, 255, 255, 0.5);
+                backdrop-filter: blur(8px);
+                border-radius: 1.25rem;
+                padding: 1.25rem;
+            }
 
-.page-hero {
-    background: linear-gradient(135deg, rgba(22, 163, 74, 0.08), rgba(14, 165, 233, 0.08));
-    border: 1px solid #e2e8f0;
-    border-radius: 1rem;
-    padding: 1rem 1.25rem;
-}
+           
 
-.surface-card {
-    border: 1px solid #e2e8f0;
-    border-radius: 1rem;
-    background: #fff;
-}
+                .main-navbar {
+                    background: rgba(255, 255, 255, 0.86);
+                    border: 1px solid rgba(219, 234, 254, 0.75);
+                    backdrop-filter: blur(10px);
+                    box-shadow: 0 10px 30px rgba(26, 42, 82, 0.09);
+                }
 
-.table-modern thead th {
-    background: #f8fafc;
-    font-weight: 700;
-    color: #0f172a;
-    border-bottom: 1px solid #e2e8f0;
-}
+                .navbar-brand {
+                    letter-spacing: 0.2px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                }
 
-.table-modern td,
-.table-modern th {
-    vertical-align: middle;
-}
+                .brand-mark {
+                    display: inline-grid;
+                    place-items: center;
+                    width: 1.75rem;
+                    height: 1.75rem;
+                    border-radius: 0.45rem;
+                    color: #fff;
+                    background: linear-gradient(135deg, #1d4ed8, #0891b2);
+                    font-size: 0.95rem;
+                }
 
-.empty-state {
-    border: 1px dashed #cbd5e1;
-    border-radius: 0.9rem;
-    background: #f8fafc;
-}
+                .navbar .nav-link {
+                    color: #253047 !important;
+                    border-radius: 0.6rem;
+                    padding: 0.45rem 0.7rem !important;
+                    transition: background-color 0.2s ease, color 0.2s ease;
+                }
 
-.contact-page .contact-card {
-    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-}
+                    .navbar .nav-link:hover {
+                        color: var(--primary) !important;
+                        background: var(--primary-soft);
+                    }
 
-.contact-page .contact-section {
-    background: #fff;
-    border: 1px solid #e9ecef;
-    border-radius: 0.75rem;
-    padding: 1rem 1.25rem;
-}
+                .card {
+                    
+                    border-radius: 1rem;
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                }
 
-.contact-page .quick-contact {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.65rem;
-}
+                   
 
-.contact-page .quick-contact-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    text-decoration: none;
-    font-weight: 600;
-    color: #0f5132;
-    background: #e8f5ee;
-    border: 1px solid #c7e9d6;
-    border-radius: 999px;
-    padding: 0.45rem 0.85rem;
-}
+                    .card:hover {
+                        transform: translateY(-3px);
+                        box-shadow: 0 14px 34px rgba(15, 23, 42, 0.1) !important;
+                    }
 
-    .contact-page .quick-contact-item:hover {
-        background: #d8efdf;
-        color: #0b3b25;
-    }
+                .surface-card,
+                .feature-card {
+                    border: 1px solid var(--border-soft);
+                    background: linear-gradient(180deg, #ffffff, #f8fbff);
+                }
 
-.contact-page .section-title {
-    color: #198754;
-    margin-bottom: 0.75rem;
-}
+                .feature-icon {
+                    font-size: 1.7rem;
+                }
 
-.contact-page .purchase-steps {
-    margin-bottom: 0;
-    padding-left: 1.1rem;
-}
+                .home-hero {
+                    border: 1px solid #d9e5fb;
+                    border-radius: 1.25rem;
+                    padding: 1.7rem;
+                    background: linear-gradient(120deg, rgba(255, 255, 255, 0.95), rgba(240, 249, 255, 0.95));
+                    box-shadow: 0 16px 38px rgba(30, 64, 175, 0.08);
+                }
 
-    .contact-page .purchase-steps li {
-        margin-bottom: 0.45rem;
-    }
+                .hero-label {
+                    display: inline-flex;
+                    align-items: center;
+                    background: #ecfdf5;
+                    color: #047857;
+                    border: 1px solid #bbf7d0;
+                    border-radius: 999px;
+                    padding: 0.35rem 0.75rem;
+                    font-size: 0.86rem;
+                    font-weight: 600;
+                }
 
-.contact-page .contact-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-}
+                .hero-panel {
+                    background: #0f172a;
+                    color: #dbeafe;
+                    border-radius: 1rem;
+                    padding: 1.1rem 1.2rem;
+                    border: 1px solid rgba(148, 163, 184, 0.35);
+                }
 
-.contact-page .contact-item {
-    padding: 0.65rem 0.75rem;
-    background: #f8f9fa;
-    border-radius: 0.5rem;
-}
+                    .hero-panel h2 {
+                        color: #fff;
+                    }
 
-.contact-page .map-frame {
-    border-radius: 0.75rem;
-    border-color: #b6e2ca !important;
-    box-shadow: 0 8px 22px rgba(25, 135, 84, 0.12);
-}
+                .hero-list {
+                    padding-left: 1.2rem;
+                }
 
-@media (min-width: 768px) {
-    .contact-page .contact-grid {
-        grid-template-columns: 1fr 1fr;
-    }
+                    .hero-list li {
+                        margin-bottom: 0.55rem;
+                    }
 
-    .contact-page .map-frame-wide {
-        aspect-ratio: 2.2 / 1;
-    }
-}
+                .btn {
+                    
+                    border-radius: 0.75rem;
+                    font-weight: 600;
+                }
+
+                .badge {
+                    border-radius: 999px;
+                    padding: 0.45rem 0.65rem;
+                }
+
+                .catalog-sort-select {
+                    min-width: 250px;
+                    border-radius: 0.65rem;
+                    border-color: #cbd5e1;
+                }
+
+                   
+                    .catalog-sort-select:focus {
+                        border-color: #16a34a;
+                        box-shadow: 0 0 0 0.2rem rgba(22, 163, 74, 0.15);
+                    }
+
+                .page-hero {
+                   
+                    background: linear-gradient(135deg, rgba(22, 163, 74, 0.1), rgba(14, 165, 233, 0.1));
+                    border: 1px solid #d6e4f7;
+                    border-radius: 1rem;
+                    padding: 1rem 1.25rem;
+                }
+
+               
+
+                .table-modern thead th {
+                    background: #f8fafc;
+                    font-weight: 700;
+                    color: #0f172a;
+                    border-bottom: 1px solid #e2e8f0;
+                }
+
+                .table-modern td,
+                .table-modern th {
+                    vertical-align: middle;
+                }
+
+                .empty-state {
+                    border: 1px dashed #cbd5e1;
+                    border-radius: 0.9rem;
+                    background: #f8fafc;
+                }
+
+                .app-footer {
+                    background: rgba(255, 255, 255, 0.8);
+                    border-top: 1px solid #dbe4f2;
+                    backdrop-filter: blur(6px);
+                }
+
+                .contact-page .contact-card {
+                    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+                }
+
+                .contact-page .contact-section {
+                    background: #fff;
+                    border: 1px solid #e9ecef;
+                    border-radius: 0.75rem;
+                    padding: 1rem 1.25rem;
+                }
+
+                .contact-page .quick-contact {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.65rem;
+                }
+
+                .contact-page .quick-contact-item {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.35rem;
+                    text-decoration: none;
+                    font-weight: 600;
+                    color: #0f5132;
+                    background: #e8f5ee;
+                    border: 1px solid #c7e9d6;
+                    border-radius: 999px;
+                    padding: 0.45rem 0.85rem;
+                }
+
+                    
+
+                    .contact-page .quick-contact-item:hover {
+                        background: #d8efdf;
+                        color: #0b3b25;
+                    }
+
+                .contact-page .section-title {
+                    color: #198754;
+                    margin-bottom: 0.75rem;
+                }
+
+                .contact-page .purchase-steps {
+                    margin-bottom: 0;
+                    padding-left: 1.1rem;
+                }
+
+                    
+
+                    .contact-page .purchase-steps li {
+                        margin-bottom: 0.45rem;
+                    }
+
+                .contact-page .contact-grid {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 0.75rem;
+                }
+
+                .contact-page .contact-item {
+                    padding: 0.65rem 0.75rem;
+                    background: #f8f9fa;
+                    border-radius: 0.5rem;
+                }
+
+                .contact-page .map-frame {
+                    border-radius: 0.75rem;
+                    border-color: #b6e2ca !important;
+                    box-shadow: 0 8px 22px rgba(25, 135, 84, 0.12);
+                }
+
+                @media (min-width: 768px) {
+                    .contact-page .contact-grid {
+                        grid-template-columns: 1fr 1fr;
+                    }
+
+                    .contact-page .map-frame-wide {

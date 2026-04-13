@@ -1,48 +1,75 @@
 ﻿@{
-	ViewData["Title"] = "Начало";
+    
+    ViewData["Title"] = "Начало";
 }
 
 
-<section class="py-5 text-center bg-light rounded-4 shadow-sm mb-5">
-    <div class="px-4 py-4">
-        <h1 class="display-5 fw-bold">Antikvarnik</h1>
-        <p class="lead mx-auto" style="max-width: 760px;">
-            Уеб платформа за публикуване, управление и продажба на редки предмети с колекционерска стойност.
-            Потребителите могат да изпращат оферти към магазина, а администраторът да ги одобрява, публикува и управлява.
-        </p>
-        <div class="d-flex justify-content-center gap-3 flex-wrap">
-            <a asp-controller="Items" asp-action="Index" class="btn btn-dark btn-lg">Разгледай каталога</a>
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                <a asp-controller="Items" asp-action="Add" class="btn btn-outline-dark btn-lg">Добави оферта</a>
-            }
-        </div>
-    </div>
-</section>
 
-<div class="row g-4">
-    <div class="col-md-4">
-        <div class="card h-100 border-0 shadow-sm">
-            <div class="card-body">
-                <h2 class="h4">Каталог с категории</h2>
-                <p class="mb-0">Структуриране на артикулите по категории, статуси и визуална галерия за всеки предмет.</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card h-100 border-0 shadow-sm">
-            <div class="card-body">
-                <h2 class="h4">Потребителски оферти</h2>
-                <p class="mb-0">Всеки регистриран потребител може да предложи артикул, който чака одобрение от администратор.</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card h-100 border-0 shadow-sm">
-            <div class="card-body">
-                <h2 class="h4">Администрация и контрол</h2>
-                <p class="mb-0">Администраторът управлява видимостта на артикулите, одобрението на оферти и бъдещите клиентски отзиви.</p>
-            </div>
-        </div>
-    </div>
-</div>
+            <section class="home-hero mb-5">
+                <div class="row g-4 align-items-center">
+                    <div class="col-lg-7">
+                        <span class="hero-label">Професионална платформа за антикварни предмети</span>
+                        <h1 class="display-5 fw-bold mt-3 mb-3">Превърни колекцията си в стойност с модерен онлайн антикварник</h1>
+                        <p class="lead mb-4">
+                            Antikvarnik е уеб платформа за публикуване, управление и продажба на редки предмети.
+                            Потребителите подават оферти към магазина, а администраторът ги преглежда, одобрява и публикува в каталога.
+                        </p>
+                        <div class="d-flex flex-wrap gap-3">
+                            <a asp-controller="Items" asp-action="Index" class="btn btn-dark btn-lg px-4">Разгледай каталога</a>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <a asp-controller="Items" asp-action="Add" class="btn btn-outline-dark btn-lg px-4">Добави оферта</a>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="hero-panel">
+                            <h2 class="h4 mb-3">Какво получаваш в платформата?</h2>
+                            <ul class="hero-list mb-0">
+                                <li>Каталог с филтриране, категории и визуални галерии.</li>
+                                <li>Управление на оферти и история на артикулите.</li>
+                                <li>Любими предмети и удобен преглед на личния профил.</li>
+                                <li>Административен контрол върху одобрение и видимост.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+           
+                <section class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        
+                            <article class="card h-100 border-0 feature-card">
+                                <div class="card-body">
+                                    <p class="feature-icon mb-3">📚</p>
+                                    <h2 class="h4">Каталог с категории</h2>
+                                    <p class="mb-0">Структуриране на артикулите по категории, статуси и визуална галерия за всеки предмет.</p>
+                                </div>
+                        
+                        </article>
+                    </div>
+                    <div class="col-md-4">
+                        
+                            <article class="card h-100 border-0 feature-card">
+                                <div class="card-body">
+                                    <p class="feature-icon mb-3">📝</p>
+                                    <h2 class="h4">Потребителски оферти</h2>
+                                    <p class="mb-0">Всеки регистриран потребител може да предложи артикул, който чака одобрение от администратор.</p>
+                                </div>
+                        
+                        </article>
+                    </div>
+                    <div class="col-md-4">
+                        
+                            <article class="card h-100 border-0 feature-card">
+                                <div class="card-body">
+                                    <p class="feature-icon mb-3">🛡️</p>
+                                    <h2 class="h4">Администрация и контрол</h2>
+                                    <p class="mb-0">Администраторът управлява видимостта на артикулите, одобрението на оферти и бъдещите клиентски отзиви.</p>
+                                </div>
+                        
+                        </article>
+                    </div>
+            
+</section>
