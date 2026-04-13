@@ -30,21 +30,58 @@ namespace Antikvarnik.Controllers
         }
 
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? categoryId, decimal? minPrice, decimal? maxPrice, string? sortBy = "newest")
         {
             var currentUser = await userManager.GetUserAsync(User);
-            
+
             var currentUserId = currentUser?.Id;
 
-            Item[] items = await dbc.Items
+            var query = dbc.Items
                 .AsNoTracking()
                 .Include(i => i.Category)
                 .Include("Images")
-                .Where(i => !i.IsDeleted &&
-                    (i.Status == ItemStatus.Available ||
-                     i.Status == ItemStatus.Sold))
-                .OrderByDescending(i => i.CreatedOn)
-                .ToArrayAsync();
+                .Where(i => !i.IsDeleted && i.Status == ItemStatus.Available)
+                .AsQueryable();
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(i => i.CategoryId == categoryId.Value);
+            }
+
+            if (minPrice.HasValue)
+            {
+                query = query.Where(i => i.Price >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(i => i.Price <= maxPrice.Value);
+            }
+
+            query = sortBy switch
+            {
+                "price_asc" => query.OrderBy(i => i.Price),
+                "price_desc" => query.OrderByDescending(i => i.Price),
+                "oldest" => query.OrderBy(i => i.CreatedOn),
+                _ => query.OrderByDescending(i => i.CreatedOn)
+            };
+
+            Item[] items = await query.ToArrayAsync();
+
+            ViewBag.Categories = await dbc.Categories
+                .AsNoTracking()
+                .OrderBy(c => c.Name)
+                .Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Name
+                })
+                .ToListAsync();
+            ViewBag.SelectedCategoryId = categoryId;
+            ViewBag.MinPrice = minPrice;
+            ViewBag.MaxPrice = maxPrice;
+            ViewBag.SortBy = sortBy;
+
             if (currentUserId != null)
             {
                 ViewBag.FavoriteItemIds = await dbc.Favorites
@@ -56,6 +93,8 @@ namespace Antikvarnik.Controllers
 
             return View(items);
         }
+    
+        
         [HttpGet]
         public async Task<IActionResult> Sold()
         {
@@ -69,6 +108,28 @@ namespace Antikvarnik.Controllers
 
             return View(soldItems);
         }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Mine()
+        {
+            var currentUser = await userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Challenge();
+            }
+
+            Item[] myItems = await dbc.Items
+                .AsNoTracking()
+                .Include(i => i.Category)
+                .Include("Images")
+                .Where(i => !i.IsDeleted && i.SellerId == currentUser.Id)
+                .OrderByDescending(i => i.CreatedOn)
+                .ToArrayAsync();
+
+            return View(myItems);
+        }
+
 
 
         public async Task<IActionResult> Details(int itemId)
@@ -324,6 +385,12 @@ namespace Antikvarnik.Controllers
                 return RedirectToAction(nameof(Details), new { itemId });
             }
 
+            if (item.SellerId == currentUser.Id)
+            {
+                TempData["StatusMessage"] = "Не можеш да закупиш собствен артикул.";
+                return RedirectToAction(nameof(Details), new { itemId });
+            }
+
             item.Status = ItemStatus.Sold;
             item.ReservedByUserId = currentUser.Id;
             item.UpdatedOn = DateTime.UtcNow;
@@ -362,6 +429,13 @@ namespace Antikvarnik.Controllers
             if (!isAdmin && !isOwner)
             {
                 return Forbid();
+            }
+
+
+            if (item.Status != ItemStatus.Waiting)
+            {
+                TempData["StatusMessage"] = "Комуникацията е достъпна само докато артикулът е в статус \"Waiting\".";
+                return RedirectToAction(nameof(Details), new { itemId });
             }
 
             dbc.ItemMessages.Add(new ItemMessage

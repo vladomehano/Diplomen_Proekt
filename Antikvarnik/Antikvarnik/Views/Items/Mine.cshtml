@@ -1,0 +1,59 @@
+﻿@model Item[]
+
+@{
+    ViewData["Title"] = "Моите артикули";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Моите артикули</h1>
+    <a asp-controller="Items" asp-action="Add" class="btn btn-primary">Добави нов артикул</a>
+</div>
+
+@if (Model.Length == 0)
+{
+    <div class="alert alert-info">
+        Все още нямаш добавени артикули.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Артикул</th>
+                    <th>Категория</th>
+                    <th>Статус</th>
+                    <th>Публикувано</th>
+                    <th class="text-end">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="@item.MainPicUrl" alt="@item.Name" style="width:52px;height:52px;object-fit:cover;border-radius:8px;" />
+                                <div>
+                                    <div class="fw-semibold">@item.Name</div>
+                                    <div class="text-muted small">@item.Price.ToString("F2") лв.</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>@(item.Category?.Name ?? "—")</td>
+                        <td>
+                            <span class="badge bg-secondary">@item.Status</span>
+                        </td>
+                        <td>@item.CreatedOn.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</td>
+                        <td class="text-end">
+                            <a asp-controller="Items" asp-action="Details" asp-route-itemId="@item.Id" class="btn btn-sm btn-outline-primary">
+                                Детайли и комуникация
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

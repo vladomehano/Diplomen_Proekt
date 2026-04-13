@@ -1,9 +1,11 @@
 ﻿@using Antikvarnik.Models.Enums
+@using Microsoft.AspNetCore.Mvc.Rendering
 @model Item[]
 
 @{
     ViewData["Title"] = "Каталог";
     var favoriteItemIds = (ViewBag.FavoriteItemIds as int[]) ?? Array.Empty<int>();
+    var sortBy = (ViewBag.SortBy as string) ?? "newest";
 }
 
 
@@ -11,8 +13,20 @@
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
     <div>
         <h1 class="mb-1 text-success">Налични и публикувани антикварни предмети</h1>
-        <p class="text-muted mb-0">Разгледай одобрени оферти, резервирани предмети и вече продадени артикули.</p>
+        <p class="text-muted mb-0">Разгледай наличните артикули и подреди списъка по предпочитан критерий</p>
     </div>
+
+    <div class="d-flex align-items-center gap-2">
+        <label for="sortBySelect" class="mb-0">Подреди по:</label>
+        <select id="sortBySelect" class="form-select">
+            <option value="" selected="@(sortBy == "newest")">По подразбиране</option>
+            <option value="price_asc" selected="@(sortBy == "price_asc")">Цена: ниска към висока</option>
+            <option value="price_desc" selected="@(sortBy == "price_desc")">Цена: висока към ниска</option>
+            <option value="oldest" selected="@(sortBy == "oldest")">Дата: стари към нови</option>
+            <option value="newest" selected="@(sortBy == "newest")">Дата: нови към стари</option>
+        </select>
+    </div>
+
     @if (User.Identity?.IsAuthenticated == true)
     {
         <a asp-controller="Items" asp-action="Add" class="btn btn-outline-dark">Добави оферта</a>
@@ -22,6 +36,9 @@
 {
     <div class="alert alert-success">@message</div>
 }
+
+
+
 
 @if (Model.Length == 0)
 {
@@ -105,4 +122,26 @@ else
             </div>
         }
     </div>
+
+    @section Scripts {
+        <script>
+            (function () {
+                const sortSelect = document.getElementById('sortBySelect');
+                if (!sortSelect) return;
+
+                sortSelect.addEventListener('change', function () {
+                    const url = new URL(window.location.href);
+                    const selected = sortSelect.value;
+
+                    if (!selected) {
+                        url.searchParams.delete('sortBy');
+                    } else {
+                        url.searchParams.set('sortBy', selected);
+                    }
+
+                    window.location.href = url.toString();
+                });
+            })();
+        </script>
+    }
 }

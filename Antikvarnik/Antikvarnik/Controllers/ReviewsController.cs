@@ -88,5 +88,23 @@ namespace Antikvarnik.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int reviewId)
+        {
+            var review = await dbc.Reviews.FirstOrDefaultAsync(r => r.Id == reviewId);
+            if (review == null)
+            {
+                return NotFound();
+            }
+
+            dbc.Reviews.Remove(review);
+            await dbc.SaveChangesAsync();
+            TempData["ReviewStatusMessage"] = "Отзивът е изтрит.";
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
