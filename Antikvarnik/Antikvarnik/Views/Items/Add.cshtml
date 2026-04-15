@@ -4,7 +4,7 @@
     ViewData["Title"] = "Добавяне на оферта";
 }
 
-<div class="row justify-content-center">
+@* <div class="row justify-content-center">
     <div class="col-lg-8">
         <div class="card shadow-sm border-0">
             <div class="card-body p-4">
@@ -83,6 +83,101 @@
         </div>
     </div>
 
+</div> *@
+
+<div class="container py-4 py-lg-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-dark text-white p-4">
+                    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                        <div>
+                            <h1 class="h3 mb-2">Добавяне на нова оферта</h1>
+                            <p class="mb-0 text-white-50">
+                                Попълни детайлите максимално точно, за да бъде обявата одобрена по-бързо.
+                            </p>
+                        </div>
+                        <span class="badge text-bg-warning fs-6">Статус при създаване: Waiting</span>
+                    </div>
+                </div>
+
+                <div class="card-body p-4 p-lg-5">
+                    <div class="alert alert-info mb-4" role="alert">
+                        След изпращане, офертата се преглежда от администратор и след одобрение става видима в каталога.
+                    </div>
+
+                    <form asp-action="Add" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4" role="alert"></div>
+
+                        <div class="row g-4">
+                            <div class="col-md-8">
+                                <label asp-for="Name" class="form-label fw-semibold">Име на артикул</label>
+                                <input asp-for="Name" class="form-control form-control-lg" placeholder="Например: Старинен джобен часовник" />
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="CategoryId" class="form-label fw-semibold"></label>
+                                <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select form-select-lg">
+                                    <option value="0">-- Избери категория --</option>
+                                </select>
+                                <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Price" class="form-label fw-semibold">Предложена цена</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">лв.</span>
+                                    <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" placeholder="0.00" />
+                                </div>
+                                <span asp-validation-for="Price" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Condition" class="form-label fw-semibold">Състояние</label>
+                                <input asp-for="Condition" class="form-control form-control-lg" placeholder="Напр. отлично, много добро, реставрирано" />
+                                <span asp-validation-for="Condition" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="YearOrPeriod" class="form-label fw-semibold">Година или период</label>
+                                <input asp-for="YearOrPeriod" class="form-control form-control-lg" placeholder="Напр. 1940-те години" />
+                                <span asp-validation-for="YearOrPeriod" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Description" class="form-label fw-semibold">Описание</label>
+                                <textarea asp-for="Description" class="form-control" rows="6" placeholder="Опиши произход, история, особености и състояние..."></textarea>
+                                <div class="form-text">Полезно е да добавиш информация за автентичност, произход и забележки.</div>
+                                <span asp-validation-for="Description" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="MainPicFile" class="form-label fw-semibold"></label>
+                                <input asp-for="MainPicFile" class="form-control" accept="image/*" />
+                                <div class="form-text">Основната снимка ще се показва в картата на обявата.</div>
+                                <span asp-validation-for="MainPicFile" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="PicturesFiles" class="form-label fw-semibold">Галерия от снимки</label>
+                                <input asp-for="PicturesFiles" class="form-control" accept="image/*" multiple />
+                                <div class="form-text">Можеш да прикачиш няколко допълнителни снимки.</div>
+                                <span asp-validation-for="PicturesFiles" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mt-4">
+                            <a asp-controller="Items" asp-action="Index" class="btn btn-outline-secondary">Отказ</a>
+                            <button type="submit" class="btn btn-dark px-4">Изпрати офертата</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {

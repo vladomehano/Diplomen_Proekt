@@ -6,9 +6,196 @@
     var isFavorite = (ViewBag.IsFavorite as bool?) ?? false;
     var canDiscuss = User.Identity?.IsAuthenticated == true &&
         (User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.SellerId);
-}
 
-@if (TempData["StatusMessage"] is string message)
+    var statusBadgeClass = Model.Status switch
+    {
+        Antikvarnik.Models.Enums.ItemStatus.Available => "text-bg-success",
+        Antikvarnik.Models.Enums.ItemStatus.Sold => "text-bg-secondary",
+        Antikvarnik.Models.Enums.ItemStatus.Waiting => "text-bg-warning",
+        _ => "text-bg-dark"
+    };
+}
+<div class="container py-4 py-lg-5">
+    @if (TempData["StatusMessage"] is string message)
+    {
+        <div class="alert alert-info" role="alert">@message</div>
+    }
+
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-0">
+                    @if (images.Length > 0)
+{
+                        <div id="itemCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-indicators">
+                                @for (var i = 0; i < images.Length; i++)
+                                {
+                                    <button type="button"
+                                            data-bs-target="#itemCarousel"
+                                            data-bs-slide-to="@i"
+                                            class="@(i == 0 ? "active" : string.Empty)"
+                                            aria-current="@(i == 0 ? "true" : "false")"
+                                            aria-label="Снимка @(i + 1)"></button>
+                                }
+                            </div>
+
+                            <div class="carousel-inner rounded">
+                                @for (var i = 0; i < images.Length; i++)
+                                {
+                                    <div class="carousel-item @(i == 0 ? "active" : string.Empty)">
+                                        <img src="@images[i]" class="d-block w-100" alt="@Model.Name" style="height: 500px; object-fit: cover;" />
+                                    </div>
+                                }
+                            </div>
+
+                            <button class="carousel-control-prev" type="button" data-bs-target="#itemCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Предишна</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#itemCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Следваща</span>
+                            </button>
+                        </div>
+                }else
+                    {
+
+                        <img src="@Model.MainPicUrl" class="img-fluid rounded" alt="@Model.Name" style="width: 100%; max-height: 500px; object-fit: cover;" />
+                    }
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-dark text-white p-4">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <h1 class="h4 mb-0">@Model.Name</h1>
+                            <span class="badge @statusBadgeClass">@Model.Status</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <ul class="list-group list-group-flush mb-4">
+                            <li class="list-group-item px-0 d-flex justify-content-between">
+                                <span class="text-muted">Категория</span>
+                                <strong>@(Model.Category?.Name ?? "Без категория")</strong>
+                            </li>
+                            <li class="list-group-item px-0 d-flex justify-content-between">
+                                <span class="text-muted">Цена</span>
+                                <strong>@Model.Price.ToString("F2") лв.</strong>
+                            </li>
+                            <li class="list-group-item px-0 d-flex justify-content-between">
+                                <span class="text-muted">Състояние</span>
+                                <strong>@Model.Condition</strong>
+                            </li>
+                            @if (!string.IsNullOrWhiteSpace(Model.YearOrPeriod))
+                            {
+                                <li class="list-group-item px-0 d-flex justify-content-between">
+                                    <span class="text-muted">Период</span>
+                                    <strong>@Model.YearOrPeriod</strong>
+                                </li>
+                            }
+                            <li class="list-group-item px-0 d-flex justify-content-between">
+                                <span class="text-muted">Публикувано</span>
+                                <strong>@Model.CreatedOn.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</strong>
+                            </li>
+                        </ul>
+                        <h2 class="h6 text-uppercase text-muted mb-2">Описание</h2>
+                        <p class="mb-4">@Model.Description</p>
+                        <div class="d-flex flex-wrap gap-2">
+                        @if (Model.Status == Antikvarnik.Models.Enums.ItemStatus.Available)
+                        {
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <form asp-controller="Items" asp-action="Buy" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="itemId" value="@Model.Id" />
+                                        <button type="submit" class="btn btn-success">Купи/Поръчай</button>
+                                    </form>
+    }
+    else
+    {
+                                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-success">Влез, за да купиш</a>
+    }
+}
+else if (Model.Status == Antikvarnik.Models.Enums.ItemStatus.Sold)
+{
+                                <span class="btn btn-outline-secondary disabled">Артикулът е продаден</span>
+}
+else if (Model.Status == Antikvarnik.Models.Enums.ItemStatus.Waiting)
+{
+                                <span class="btn btn-outline-warning disabled">Очаква одобрение</span>
+}
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <form asp-controller="Favorites" asp-action="Toggle" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="itemId" value="@Model.Id" />
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                    <button type="submit" class="btn @(isFavorite ? "btn-danger" : "btn-outline-danger")">
+                                        @(isFavorite ? "Премахни от любими" : "Добави в любими")
+                                    </button>
+                                </form>
+                            }
+
+                            @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+                            {
+                                <a asp-action="Edit" asp-route-itemId="@Model.Id" class="btn btn-outline-primary">Редактирай артикула</a>
+                            }
+
+                            @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin") && Model.Status == Antikvarnik.Models.Enums.ItemStatus.Sold)
+                            {
+                                <form asp-controller="Items" asp-action="MarkAsAvailable" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="itemId" value="@Model.Id" />
+                                    <button type="submit" class="btn btn-outline-success">Върни като наличен</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @if (canDiscuss && Model.Status == Antikvarnik.Models.Enums.ItemStatus.Waiting)
+    {
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-light py-3">
+                <h2 class="h5 mb-0">Комуникация по офертата</h2>
+            </div>
+            <div class="card-body">
+                @if (Model.Messages.Count == 0)
+                {
+                    <div class="alert alert-secondary mb-3" role="alert">Все още няма съобщения.</div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-2 mb-3">
+                        @foreach (var msg in Model.Messages.OrderBy(m => m.SentOn))
+                        {
+                            <div class="border rounded p-3 bg-light-subtle">
+                                <div class="small text-muted mb-1">
+                                    @(msg.Sender?.UserName ?? msg.Sender?.Email ?? "Потребител")
+                                    • @msg.SentOn.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                                </div>
+                                <div>@msg.MessageText</div>
+                            </div>
+                            }
+                        </div>
+    }
+                    <form asp-controller="Items" asp-action="AddMessage" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="itemId" value="@Model.Id" />
+                        <div class="mb-2">
+                            <textarea name="messageText" class="form-control" rows="3" maxlength="1000" required placeholder="Напиши съобщение..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">Изпрати съобщение</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+
+
+@* @if (TempData["StatusMessage"] is string message)
 {
     <div class="alert alert-info">@message</div>
 }
@@ -167,4 +354,6 @@
             </form>
         </div>
     </div>
-}
+} *@
+
+     
