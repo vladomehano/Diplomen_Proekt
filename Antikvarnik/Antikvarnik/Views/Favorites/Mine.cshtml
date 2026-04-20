@@ -7,8 +7,8 @@
 
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
     <div>
-        <h1 class="mb-1 text-danger">Любими артикули</h1>
-        <p class="text-muted mb-0">Тук ще намираш всички продукти, които си харесал, без да търсиш отново в целия каталог.</p>
+        <h1 class="mb-1">Любими артикули</h1>
+        <p class="text-body-secondary mb-0">Тук ще намираш всички продукти, които си харесал, без да търсиш отново в целия каталог.</p>
     </div>
     <a asp-controller="Items" asp-action="Index" class="btn btn-outline-dark">Към каталога</a>
 </div>
@@ -29,10 +29,10 @@ else
         {
             var badgeClass = item.Status switch
             {
-                ItemStatus.Available => "bg-success",
+                ItemStatus.Available => "text-bg-success",
                 
-                ItemStatus.Sold => "bg-secondary",
-                _ => "bg-danger"
+                ItemStatus.Sold => "text-bg-secondary",
+                _ => "text-bg-danger"
             };
 
             <div class="col-md-6 col-xl-4">
